@@ -69,7 +69,7 @@ func main() {
 	// connect to this socket
 	conn, err := net.Dial("tcp", "127.0.0.1:30003")
 	if err != nil {
-		fmt.Print("Error: unable to connect to socket\n", err)
+		fmt.Print("Error: unable to connect to socket. Is rtl-sdr plugged in with dump1090 running (alias adsb)?\n", err)
 		os.Exit(1)
 	}
 
@@ -85,8 +85,8 @@ func main() {
 		var aMessage []string = strings.Split(message, ",")
 		var msg adsbMsg = adsbMsg{
 			MessageType: aMessage[0],
-			//			TransmissionType:     strconv.Atoi(aMessage[1]),
-			//			SessionID:            aMessage[2],
+			//TransmissionType:     strconv.Atoi(aMessage[1]),
+			//SessionID : aMessage[2],
 			AircraftID:           aMessage[3],
 			HexIdent:             aMessage[4],
 			FlightID:             aMessage[5],
@@ -95,12 +95,12 @@ func main() {
 			DateMessageLogged:    aMessage[8],
 			TimeMessageLogged:    aMessage[9],
 			Callsign:             aMessage[10],
-			//			Altitude:             aMessage[11],
-			//			GroundSpeed:          aMessage[12],
-			//			Track:                aMessage[13],
-			//			Latitude:             aMessage[14],
-			//			Longitude:            aMessage[15],
-			//			VerticalRate:         aMessage[16],
+			//Altitude:             aMessage[11],
+			//GroundSpeed:          aMessage[12],
+			//Track:                aMessage[13],
+			//Latitude:             aMessage[14],
+			//Longitude:            aMessage[15],
+			//VerticalRate:         aMessage[16],
 			Squawk:     aMessage[17],
 			Alert:      aMessage[18],
 			Emergency:  aMessage[19],
@@ -109,7 +109,7 @@ func main() {
 		}
 		aircraftMsgTypeCount[Key{aMessage[3], aMessage[0]}]++
 
-		fmt.Println("msg: ", msg)
+		fmt.Printf("msg:%v\n", msg)
 
 	}
 }
