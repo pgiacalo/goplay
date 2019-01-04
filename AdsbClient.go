@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
-	"flag"
+	//"flag"
 	"fmt"
 	"net"
+	"os"
 //	"strconv"
 	"strings"
 	//	"github.com/davecgh/go-spew/"
@@ -66,7 +67,12 @@ var aircraftMsgTypeCount = make(map[Key]int)
 func main() {
 
 	// connect to this socket
-	conn, _ := net.Dial("tcp", "127.0.0.1:30003")
+	conn, err := net.Dial("tcp", "127.0.0.1:30003")
+	if err != nil {
+		fmt.Print("net.Dial error:\n", err)
+		os.Exit(1)
+	}
+
 	for {
 		// read in input from stdin
 		//		reader := bufio.NewReader(os.Stdin)
@@ -104,10 +110,7 @@ func main() {
 		}
 		aircraftMsgTypeCount[Key{aMessage[3], aMessage[0]}]++
 
-		fmt.Println("adsb struct: ")
-		for i:=0; i<msg.; i++ {
-			fmt.Println(msg[i])
-		}
+		fmt.Println("msg: ", msg)
 
 	}
 }
