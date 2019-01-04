@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
-//	"strconv"
+	//	"strconv"
 	"strings"
 	//	"github.com/davecgh/go-spew/"
 )
@@ -69,25 +69,24 @@ func main() {
 	// connect to this socket
 	conn, err := net.Dial("tcp", "127.0.0.1:30003")
 	if err != nil {
-		fmt.Print("net.Dial error:\n", err)
+		fmt.Print("Error: unable to connect to socket\n", err)
 		os.Exit(1)
 	}
 
+	// loop forever to read messages arriving from the socket
 	for {
-		// read in input from stdin
-		//		reader := bufio.NewReader(os.Stdin)
-		//		fmt.Print("Text to send: ")
-		//		text, _ := reader.ReadString('\n')
-		// send to socket
-		//		fmt.Fprintf(conn, text + "\n")
-		// listen for reply
-		message, _ := bufio.NewReader(conn).ReadString('\n')
+		message, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			fmt.Print("Error while reading from connection:\n", err)
+			os.Exit(1)
+		}
+
 		fmt.Print("Message from server: " + message)
 		var aMessage []string = strings.Split(message, ",")
 		var msg adsbMsg = adsbMsg{
-			MessageType:          aMessage[0],
-//			TransmissionType:     strconv.Atoi(aMessage[1]),
-//			SessionID:            aMessage[2],
+			MessageType: aMessage[0],
+			//			TransmissionType:     strconv.Atoi(aMessage[1]),
+			//			SessionID:            aMessage[2],
 			AircraftID:           aMessage[3],
 			HexIdent:             aMessage[4],
 			FlightID:             aMessage[5],
@@ -96,17 +95,17 @@ func main() {
 			DateMessageLogged:    aMessage[8],
 			TimeMessageLogged:    aMessage[9],
 			Callsign:             aMessage[10],
-//			Altitude:             aMessage[11],
-//			GroundSpeed:          aMessage[12],
-//			Track:                aMessage[13],
-//			Latitude:             aMessage[14],
-//			Longitude:            aMessage[15],
-//			VerticalRate:         aMessage[16],
-			Squawk:               aMessage[17],
-			Alert:                aMessage[18],
-			Emergency:            aMessage[19],
-			SPI:                  aMessage[20],
-			IsOnGround:           aMessage[21],
+			//			Altitude:             aMessage[11],
+			//			GroundSpeed:          aMessage[12],
+			//			Track:                aMessage[13],
+			//			Latitude:             aMessage[14],
+			//			Longitude:            aMessage[15],
+			//			VerticalRate:         aMessage[16],
+			Squawk:     aMessage[17],
+			Alert:      aMessage[18],
+			Emergency:  aMessage[19],
+			SPI:        aMessage[20],
+			IsOnGround: aMessage[21],
 		}
 		aircraftMsgTypeCount[Key{aMessage[3], aMessage[0]}]++
 
