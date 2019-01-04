@@ -66,10 +66,12 @@ var aircraftMsgTypeCount = make(map[Key]int)
 
 func main() {
 
-	// connect to this socket
-	conn, err := net.Dial("tcp", "127.0.0.1:30003")
+	const dump1090SocketAddress = "127.0.0.1:30003"
+
+	// connect to the socket
+	conn, err := net.Dial("tcp", dump1090SocketAddress)
 	if err != nil {
-		fmt.Print("Error: unable to connect to socket. Is rtl-sdr plugged in with dump1090 running (alias adsb)?\n", err)
+		fmt.Printf("Error: unable to connect to socket. Is rtl-sdr connected with dump1090 running? Note: launch dump1090 with alias \"adsb\" or \"adsbfile\")? \n%s", err)
 		os.Exit(1)
 	}
 
@@ -81,7 +83,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Print("Message from server: " + message)
+		fmt.Print("Message received from dump1090 socket: " + message)
 		var aMessage []string = strings.Split(message, ",")
 		var msg adsbMsg = adsbMsg{
 			MessageType: aMessage[0],
