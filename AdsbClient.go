@@ -71,7 +71,8 @@ func main() {
 	// connect to the socket
 	conn, err := net.Dial("tcp", dump1090SocketAddress)
 	if err != nil {
-		fmt.Printf("Error: unable to connect to socket. Is rtl-sdr connected with dump1090 running? Note: launch dump1090 with alias \"adsb\" or \"adsbfile\")? \n%s", err)
+		fmt.Printf("Error: unable to connect to socket. Is rtl-sdr connected with dump1090 running? "+
+			"Note: launch dump1090 with alias \"adsb\" or \"adsbfile\")? \n%s", err)
 		os.Exit(1)
 	}
 
