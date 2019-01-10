@@ -80,7 +80,7 @@ func main() {
 	for {
 		message, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
-			fmt.Print("Error while reading from connection:\n", err)
+			fmt.Print("Error while reading from socket:\n", err)
 			os.Exit(1)
 		}
 

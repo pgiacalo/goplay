@@ -35,8 +35,18 @@ func (p Person) PrintFullName(msg string) {
 	fmt.Printf("%s %s %s\n", msg, p.FirstName, p.LastName)
 }
 
+func changeParam(val *int, delta int) {
+	fmt.Printf("1. val address=%p/n", val)
+	*val = *val + delta
+}
+
+func noEffect(val int, delta int) {
+	fmt.Printf("2. val address=%p/n", &val)
+	val = val + delta
+}
+
 func main() {
-	q := new (Person)
+	q := new(Person)
 	fmt.Printf("Type of Person, q %T\n", q) //Type of Person, q *main.Person
 	q.PrintFullName("1.")
 
@@ -55,4 +65,12 @@ func main() {
 	p.PrintFullName("4.") //p remains unchanged
 	m.PrintFullName("5.") //a new person (m) was returned, while leaving p unchanged
 
+	var x int
+	fmt.Printf("0. val address=%p\n", &x)
+
+	changeParam(&x, 6)
+	fmt.Printf("x=%v\n", x)
+
+	noEffect(x, 5)
+	fmt.Printf("x=%v\n", x)
 }
