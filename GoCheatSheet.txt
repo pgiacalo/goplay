@@ -1,0 +1,99 @@
+Golang Cheat Sheet
+
+===========
+25 Keywords
+===========
+
+break        default      func         interface    select
+case         defer        go           map          struct
+chan         else         goto         package      switch
+const        fallthrough  if           range        type
+continue     for          import       return       var
+
+==========================
+Type declaration (structs)
+==========================
+A struct's fields usually represent the "has-a" relationship. For example a Circle has an x,y location and a radius. 
+
+type Circle struct {
+  x float64
+  y float64
+  r float64
+}
+	==or==
+type Circle struct {
+  x, y, r float64
+}
+
+==============
+Embedded Types (inheritance)
+==============
+Embedded types within a struct can be used to represent the "is-a" relationship 
+
+type Person struct {
+  Name string
+}
+func (p *Person) Talk() {
+  fmt.Println("Hi, my name is", p.Name)
+}
+
+type Android struct {
+  Person		//an embedded type without a name represents the "is-a" relationship (an Android is-a type of Person)
+  Model string
+}
+a := Android{name: "R2D2"}
+a.Talk()
+
+==============
+Initialization (3 different ways)
+==============
+
+var c Circle		//creates a local Circle variable that is by default set to zero
+
+c := new(Circle)	//allocates memory for all the fields, sets them all to their zero value and returns a pointer (*Circle) 
+
+c := Circle{x: 0, y: 0, r: 5}	//allocates memory, sets all the values, and returns a pointer (*Circle)
+
+=========
+Functions
+=========
+// this function cannot modify the given Circle argument (because arguments are always copied in Go)
+func circleArea(c Circle) float64 {
+  return math.Pi * c.r*c.r
+}
+
+fmt.Println(circleArea(c))
+
+// in order to allow the function to modify the argument, it must be specified as a pointer, like this 
+func circleArea(c *Circle) float64 {
+  return math.Pi * c.r*c.r
+}
+
+fmt.Println(circleArea(&c))
+
+=======
+Methods (have receivers: Pointer Receivers or Value Receivers) 
+=======
+A special type of go function is known as a Method. 
+Methods have a "receiver" type specified between the keyword "func" and the name of the function. 
+
+// Value Receiver -- this method cannot modify the given Circle argument 
+func (c Circle) area() float64 {
+  return math.Pi * c.r*c.r
+}
+
+// Pointer Receiver -- this method CAN modify the given Circle argument 
+func (c *Circle) Area() float64 {
+  return math.Pi * c.r*c.r
+}
+
+By creating the function in this way it allows us to call the function using the . operator:
+
+fmt.Println(c.area())
+ ==or==
+fmt.Println((&c).Area())
+
+
+This is easier to read, we no longer need the & operator (Go automatically knows to pass a pointer to the circle)
+
+
