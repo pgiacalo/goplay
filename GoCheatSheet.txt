@@ -44,15 +44,19 @@ type Android struct {
 a := Android{name: "R2D2"}
 a.Talk()
 
-==============
-Initialization (3 different ways)
-==============
+==========================
+Initialization/Declaration (different ways)
+==========================
 
-var c Circle		//creates a local Circle variable that is by default set to zero
+var f *Circle = new(Circle) //creates a Circle variable that is by default set to zero
 
+var c Circle		            //creates a Circle variable that is by default set to zero
+
+--- short form --- (ONLY inside of functions)
 c := new(Circle)	//allocates memory for all the fields, sets them all to their zero value and returns a pointer (*Circle) 
 
 c := Circle{x: 0, y: 0, r: 5}	//allocates memory, sets all the values, and returns a pointer (*Circle)
+
 
 =========
 Functions

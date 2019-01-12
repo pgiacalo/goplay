@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"time"
+
 	//"flag"
 	"fmt"
 	"net"
@@ -81,6 +83,15 @@ type Key struct {
 var aircraftMsgTypeCount = make(map[Key]int)
 
 func main() {
+
+	const qty = 100
+	var messages [qty]adsbMsg
+	var start = time.Now()
+	for i := 0; i < qty; i++ {
+		messages[i] = adsbMsg{}
+	}
+	var elapsed = time.Now().Sub(start)
+	fmt.Printf("Elapsed time=%v\n", elapsed)
 
 	const dump1090SocketAddress = "127.0.0.1:30003"
 
