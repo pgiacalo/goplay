@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+func init(){
+	fmt.Println("DBTest init() called")
+}
+
 func main(){
 	fmt.Println("DBTest.main() called")
 	//postgres: local user=phil, docker user=postgres
