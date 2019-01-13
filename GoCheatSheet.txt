@@ -180,13 +180,19 @@ for {
 Printf Escape Sequences
 =======================
 
+var x float64 = 123456.7890001
+fmt.Printf("%.2f, %T\n", x, x) //123456.79, float64
+
+str := fmt.Sprintf("Sprintf = %.2f\n", x)
+fmt.Print(str)  //Sprintf = 123456.79
+
 The default format for %v is:
 
-bool:                    %t
-int, int8 etc.:          %d
-uint, uint8 etc.:        %d, %#x if printed with %#v
-float32, complex64, etc: %g
-string:                  %s
-chan:                    %p
-pointer:                 %p
+bool:                    %t   //the word true or false
+int, int8 etc.:          %d   //base 10
+uint, uint8 etc.:        %d   //base 10   (%#x if printed with %#v)
+float32, complex64, etc: %g   //float with decimal point (with exponent for large values)
+string:                  %s   //the uninterpreted bytes of the string or slice
+chan:                    %p   //pointer - base 16 notation, with leading 0x 
+pointer:                 %p   //base 16 notation, with leading 0x
 

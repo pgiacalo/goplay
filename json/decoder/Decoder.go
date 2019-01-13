@@ -1,6 +1,7 @@
-package main	//should be package json (but main can't be called outside of the main package)
+package main //should be package json (but main can't be called outside of the main package)
 
 // An example showing how to populate a hierarchy of structs from a json file (post.json)
+// KEY POINT: structs using reflection for marshalling/unmarshalling must have exported fields (i.e., Capitalized names)
 // ref: Go Web Services book, by Chang (Manning Publishing), p.177
 
 import (
@@ -29,7 +30,7 @@ type Comment struct {
 }
 
 func main() {
-	jsonFile, err := os.Open("post.json")
+	jsonFile, err := os.Open("../post.json")
 	if err != nil {
 		fmt.Println("Error opening JSON file:", err)
 		return
