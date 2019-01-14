@@ -1,9 +1,12 @@
-// This package holds the code from
+package main
+
+// references for this code:
+// https://play.golang.org/p/HCbY04zIg3
+//
 // http://rogpeppe.wordpress.com/2009/12/01/concurrent-idioms-1-broadcasting-values-in-go-with-linked-channels/
 // updated to Go 1 standard. In particular, it's now OK to pass around
 // by-value objects containing private fields, and we don't need to use
 // semicolons.
-package main
 
 import (
 	"fmt"
@@ -17,8 +20,8 @@ type broadcast struct {
 
 // Broadcaster allows
 type Broadcaster struct {
-	listenc chan chan (chan broadcast)
-	sendc   chan<- interface{}
+	cc    chan broadcast
+	sendc chan<- interface{}
 }
 
 // Receiver can be used to wait for a broadcast value.
@@ -28,38 +31,36 @@ type Receiver struct {
 
 // NewBroadcaster returns a new broadcaster object.
 func NewBroadcaster() Broadcaster {
-	listenc := make(chan (chan (chan broadcast)))
+	cc := make(chan broadcast, 1)
 	sendc := make(chan interface{})
+	b := Broadcaster{
+		sendc: sendc,
+		cc:    cc,
+	}
+
 	go func() {
-		currc := make(chan broadcast, 1)
 		for {
 			select {
 			case v := <-sendc:
 				if v == nil {
-					currc <- broadcast{}
+					b.cc <- broadcast{}
 					return
 				}
 				c := make(chan broadcast, 1)
-				b := broadcast{c: c, v: v}
-				currc <- b
-				currc = c
-			case r := <-listenc:
-				r <- currc
+				newb := broadcast{c: c, v: v}
+				b.cc <- newb
+				b.cc = c
 			}
 		}
 	}()
-	return Broadcaster{
-		listenc: listenc,
-		sendc:   sendc,
-	}
+
+	return b
 }
 
 // Listen starts returns a Receiver that
 // listens to all broadcast values.
 func (b Broadcaster) Listen() Receiver {
-	c := make(chan chan broadcast, 0)
-	b.listenc <- c
-	return Receiver{<-c}
+	return Receiver{b.cc}
 }
 
 // Write broadcasts a a value to all listeners.
@@ -77,36 +78,72 @@ func (r *Receiver) Read() interface{} {
 	return v
 }
 
+
 //--------- testing code ----------
 
-type message struct {
+type messageA struct {
 	id int
 	name string
 }
 
-var b = NewBroadcaster();
+type messageB struct {
+	id int
+	value float64
+	msg messageA
+}
 
 func listen(id int, r Receiver) {
 	for v := r.Read(); v != nil; v = r.Read() {
-//		go listen(r);
+		//		go listen(r);
 		fmt.Printf("listener id:%v, received message:%v\n", id, v);
 	}
 }
 
+// setup 2 separate broadcasters (i.e., two separate publisher topics)
+var a = NewBroadcaster();
+var b = NewBroadcaster();
+
 func main() {
-	receiver1 := b.Listen();
-	receiver2 := b.Listen();
+	//create 2 receivers (i.e., subscribers) to publisher "a"
+	receiverA1 := a.Listen();
+	receiverA2 := a.Listen();
+
+	//create 2 receivers (i.e., subscribers) to publisher "b"
+	receiverB1 := b.Listen();
+	receiverB2 := b.Listen();
+
+	//start two listeners to listen for broadcasts from broadcaster a
+	go listen(1, receiverA1);
+	go listen(2, receiverA2);
 
 	//start two listeners to listen for broadcasts from broadcaster b
-	go listen(1, receiver1);
-	go listen(2, receiver2);
+	go listen(3, receiverB1);
+	go listen(4, receiverB2);
 
+	//publish messages via publisher a
+	go sendA()
+	//publish messages via publisher b
+	go sendB()
+
+	//keep main alive so the work can get done
+	time.Sleep(3 * 1e9);
+}
+
+func sendA(){
 	for i := 0; i  < 10; i++ {
-		m := message{i, "Hello World"}
-		b.Write(m);
+		msgA := messageA{i, "Msg A name"}
+		a.Write(msgA);
+		time.Sleep(250 * time.Millisecond)
+	}
+	a.Write(nil);
+}
+
+func sendB(){
+	for i := 0; i  < 10; i++ {
+		msgA := messageA{i, "Embedded msg A name"}
+		msgB := messageB{i, 3.1415, msgA}
+		b.Write(msgB);
 		time.Sleep(250 * time.Millisecond)
 	}
 	b.Write(nil);
-
-	time.Sleep(3 * 1e9);
 }
