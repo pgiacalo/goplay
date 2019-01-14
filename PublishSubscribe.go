@@ -1,8 +1,16 @@
 package main
 
+// This is an implementation of a Publish/Subscribe pattern.
+// It enables messages to be published to multiple receivers (subscribers).
+// Note that each receiver gets its own COPY of the original message.
+//
+// See the test code at the bottom of this file
+//
 // references for this code:
+// Source code:
 // https://play.golang.org/p/HCbY04zIg3
 //
+// Discussion:
 // http://rogpeppe.wordpress.com/2009/12/01/concurrent-idioms-1-broadcasting-values-in-go-with-linked-channels/
 // updated to Go 1 standard. In particular, it's now OK to pass around
 // by-value objects containing private fields, and we don't need to use
@@ -79,25 +87,34 @@ func (r *Receiver) Read() interface{} {
 }
 
 
-//--------- testing code ----------
+//--------- test code ----------
 
+//a message struct that will be published
 type messageA struct {
 	id int
 	name string
 }
 
+//a message struct that will be published
 type messageB struct {
 	id int
-	value float64
+	name string
 	msg messageA
 }
 
+//implementation of the listener that waits for messages to arrive via the given receiver (the id is just for debugging)
 func listen(id int, r Receiver) {
 	for v := r.Read(); v != nil; v = r.Read() {
-		//		go listen(r);
 		fmt.Printf("listener id:%v, received message:%v\n", id, v);
+		//collect all the messages in one array -- just to double check what is being received
+		msgCollection[msgCounter] = v
+		msgCounter++
 	}
 }
+
+var msgsToSend = 5
+var msgCounter = 0
+var msgCollection []interface{} = make([]interface{}, 4*msgsToSend) //4 subscribers
 
 // setup 2 separate broadcasters (i.e., two separate publisher topics)
 var a = NewBroadcaster()
@@ -113,36 +130,43 @@ var receiverB2 = b.Listen()
 
 func main() {
 
-	//start two listeners to listen for broadcasts from broadcaster a
+	//start two listeners -- to listen for broadcasts from broadcaster a
 	go listen(1, receiverA1);
 	go listen(2, receiverA2);
 
-	//start two listeners to listen for broadcasts from broadcaster b
+	//start two listeners -- to listen for broadcasts from broadcaster b
 	go listen(3, receiverB1);
 	go listen(4, receiverB2);
 
 	//publish some messages via publisher a
-	go sendA(5)
+	go sendA(msgsToSend)
 	//publish some messages via publisher b
-	go sendB(5)
+	go sendB(msgsToSend)
 
 	//keep main alive so the work can get done
 	time.Sleep(3 * 1e9);
+
+	//Finally, print out all of the messages received so we can see exactly what was received.
+	//Note that each message has its own address, indicating that the messages are copies of the original.
+	for i:=0; i<len(msgCollection); i++{
+		fmt.Printf("msgCollection[%v]: %v, addr: %v\n", i, msgCollection[i], &msgCollection[i])
+	}
 }
 
 func sendA(qty int){
 	for i := 0; i  < qty; i++ {
-		msgA := messageA{i, "Msg A name"}
+		msgA := messageA{i, "Msg A"}
 		a.Write(msgA);
 		time.Sleep(250 * time.Millisecond)
 	}
+	//writing nil closes the
 	a.Write(nil);
 }
 
 func sendB(qty int){
 	for i := 0; i  < qty; i++ {
-		msgA := messageA{i, "Embedded msg A name"}
-		msgB := messageB{i, 3.1415, msgA}
+		msgA := messageA{i, "Embedded msg A"}
+		msgB := messageB{i, "Msg B", msgA}
 		b.Write(msgB);
 		time.Sleep(250 * time.Millisecond)
 	}
