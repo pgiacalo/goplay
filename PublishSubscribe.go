@@ -57,13 +57,13 @@ func NewBroadcaster() Broadcaster {
 	return b
 }
 
-// Listen starts returns a Receiver that
+// Listen returns a Receiver that
 // listens to all broadcast values.
 func (b Broadcaster) Listen() Receiver {
 	return Receiver{b.cc}
 }
 
-// Write broadcasts a a value to all listeners.
+// Write broadcasts a value to all listeners.
 func (b Broadcaster) Write(v interface{}) {
 	b.sendc <- v
 }
@@ -100,17 +100,18 @@ func listen(id int, r Receiver) {
 }
 
 // setup 2 separate broadcasters (i.e., two separate publisher topics)
-var a = NewBroadcaster();
-var b = NewBroadcaster();
+var a = NewBroadcaster()
+var b = NewBroadcaster()
+
+//create 2 receivers (i.e., subscribers) to publisher "a"
+var receiverA1 = a.Listen()
+var receiverA2 = a.Listen()
+
+//create 2 receivers (i.e., subscribers) to publisher "b"
+var receiverB1 = b.Listen()
+var receiverB2 = b.Listen()
 
 func main() {
-	//create 2 receivers (i.e., subscribers) to publisher "a"
-	receiverA1 := a.Listen();
-	receiverA2 := a.Listen();
-
-	//create 2 receivers (i.e., subscribers) to publisher "b"
-	receiverB1 := b.Listen();
-	receiverB2 := b.Listen();
 
 	//start two listeners to listen for broadcasts from broadcaster a
 	go listen(1, receiverA1);
@@ -120,17 +121,17 @@ func main() {
 	go listen(3, receiverB1);
 	go listen(4, receiverB2);
 
-	//publish messages via publisher a
-	go sendA()
-	//publish messages via publisher b
-	go sendB()
+	//publish some messages via publisher a
+	go sendA(5)
+	//publish some messages via publisher b
+	go sendB(5)
 
 	//keep main alive so the work can get done
 	time.Sleep(3 * 1e9);
 }
 
-func sendA(){
-	for i := 0; i  < 10; i++ {
+func sendA(qty int){
+	for i := 0; i  < qty; i++ {
 		msgA := messageA{i, "Msg A name"}
 		a.Write(msgA);
 		time.Sleep(250 * time.Millisecond)
@@ -138,8 +139,8 @@ func sendA(){
 	a.Write(nil);
 }
 
-func sendB(){
-	for i := 0; i  < 10; i++ {
+func sendB(qty int){
+	for i := 0; i  < qty; i++ {
 		msgA := messageA{i, "Embedded msg A name"}
 		msgB := messageB{i, 3.1415, msgA}
 		b.Write(msgB);
