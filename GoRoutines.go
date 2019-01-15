@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	numCPUs:= runtime.NumCPU()
+	numCPUs := runtime.NumCPU()
 	println("CPUs =", numCPUs)
 
 	runtime.GOMAXPROCS(numCPUs) //sets the max number of processors this will use
@@ -26,7 +26,7 @@ func main() {
 	//sleep to keep this main thread alive while the go routines are running
 	sleepDur, _ := time.ParseDuration("2s")
 	time.Sleep(sleepDur)
-	fmt.Printf("Time main thread was alive: %v", sleepDur)
+	fmt.Printf("Time main thread was alive: %v\n", sleepDur)
 }
 
 func generatePrimes(id int) []int {
