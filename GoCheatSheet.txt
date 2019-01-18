@@ -10,6 +10,19 @@ chan         else         goto         package      switch
 const        fallthrough  if           range        type
 continue     for          import       return       var
 
+Predeclared names
+-----------------
+
+Constants: true false iota nil
+Types:  int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64 uintptr 
+        float32 float64 complex128 complex64 bool byte rune string error
+Functions: make len cap new append copy close delete complex real imag panic recover
+
+Declarations
+------------
+There are four major kinds of declarations: 
+  var, const, type, and func
+
 ==========================
 Type declaration (structs)
 ==========================
@@ -48,17 +61,17 @@ a.Talk()
 Initialization/Declaration (different ways)
 ==========================
 
-var f *Circle = new(Circle) //creates a Circle variable that is by default set to zero
-                            //function new(T) returns a pointer to a newly allocated zero value of type T
+var f *Circle = new(Circle)       //creates a Circle variable that is by default set to zero
+                                  //function new(T) returns a pointer to a newly allocated zero value of type T
 
-var c Circle		            //creates a Circle variable that is by default set to zero
+var c Circle		                  //creates a variable (c) of type Circle that is by default set to zero
 
-var c = Circle{x: 0, y: 0, r: 5}
+var c = Circle{x: 0, y: 0, r: 5}  //creates a variable (c) of type Circle with given initial values
 
 --- short form --- (ONLY inside of functions)
 c := new(Circle)	//allocates memory for all the fields, sets them all to their zero value and returns a pointer (*Circle) 
 
-c := Circle{x: 0, y: 0, r: 5}	//allocates memory, sets all the values, and returns a pointer (*Circle)
+c := Circle{x: 0, y: 0, r: 5}	//allocates memory, sets all the values, an object of type Circle
 
 The following are 3 equivalent ways to create an object and return a pointer to the object's address
     // Allocate enough memory to store a bytes.Buffer value and return a pointer to the value's address.
@@ -69,14 +82,16 @@ The following are 3 equivalent ways to create an object and return a pointer to 
     p := &bytes.Buffer{}
 
     // Use the new() function to perform allocation, which will return a pointer to the value's address.
-    p := new(bytes.Buffer)
+    p := new(bytes.Buffer)    //note that new() is rarely used
 
 ===============
 new() vs make()
 ===============
 
-new():  The built-in function new(T) allocates “zeroed” storage for a new item of type T.
-        It returns a pointer to a newly allocated zero value of type T. 
+new():  The built-in function new(T) is rarely used. It allocates “zeroed” storage for a new item of type T.
+        It returns a pointer (*T) to a newly allocated zero value of type T. 
+
+        var x *int = new(int)
 
 make(): The built-in function make(T, args) is used to create slices, maps, and channels only.
         It returns an initialized (not zeroed) value of type T (not *T). 
@@ -96,7 +111,19 @@ make(): The built-in function make(T, args) is used to create slices, maps, and 
 Arrays and Slices
 =================
 
-        Because slices are variable-length, it is possible to have each inner slice be a different length. 
+    Declare and assign array values:
+
+        medals := []string{"gold", "silver", "bronze"}
+        fmt.Println(medals)   //[gold silver bronze]
+          
+    The above declaration also assigns each element, as if it had been written like this:
+        var medals [3]string
+        medals[0] = "gold"
+        medals[1] = "silver"
+        medals[2] = "bronze"
+        fmt.Println(medals)   //[gold silver bronze]
+
+    Because slices are variable-length, it is possible to have each inner slice be a different length. 
 
         text := LinesOfText{
           []byte("Now is the time"),
@@ -114,6 +141,60 @@ Arrays and Slices
         for i := range picture {
           picture[i] = make([]uint8, XSize)
         }
+
+===================
+String manipulation
+===================
+
+Four standard packages are particularly important for manipulating strings: 
+  bytes, strings, strconv, and unicode 
+
+"strings" package - provides many functions for searching, replacing, comparing , 
+trimming, splitting, and joining strings. It includes functions like ToUpper and ToLower, 
+that return a new string with the specified transformation applied.
+
+  Other functions in the "strings" package:
+    func Contains(s, substr string) bool
+    func Count(s, sep string) int
+    func Fields(s string) []string
+    func HasPrefix(s, prefix string) bool
+    func Index(s, sep string) int
+    func Join(a []string, sep string) string
+
+"strconv" package - provides functions for converting boolean, integer, and floating-point values 
+to and from their string representations, and functions for quoting and unquoting strings.
+
+  Other functions in the strconv package:
+    func Atoi
+    func Itoa
+    func ParseInt
+    func ParseUint
+    func ParseBool
+    func ParseFloat
+    func FormatInt
+
+"unicode package - provides functions like IsDigit, IsLetter, IsUpper, and IsLower for
+classifying runes. Each function takes a single rune argument and returns a boolean.
+
+
+=========================
+iota - Constant Generator
+=========================
+
+The following example uses iota to declare Sunday to be 0, Monday to be 1, and so on.
+
+  type Weekday int
+
+  const (
+    Sunday Weekday = iota
+    Monday
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+  )
+
 
 =========
 Functions
@@ -156,6 +237,33 @@ fmt.Println((&c).Area())
 
 This is easier to read, we no longer need the & operator (Go automatically knows to pass a pointer to the circle)
 
+========
+Pointers
+========
+
+- The expression &x (‘address of x‘) yields a pointer to an integer variable, that is, a value of type *int, which is pronounced ‘pointer to int.' 
+- If this value is called p, we say ‘p points to x,' or equivalently ‘p contains the address of x.' 
+- The variable x to which p points is written *p. The expression *p yields the value at address p.
+- Since *p denotes a variable, it may also appear on the left-hand side of an assignment, in which case 
+the assignment updates the variable (x).
+
+x := 1          //variable delcaration
+p := &x         // p, of type *int, points to x (p is a pointer that holds the address of x)
+fmt.Println(*p) // "1"  (the value at p is still 1)
+*p = 2          // equivalent to x = 2 (the value at p now equals 2, so x equals 2)
+fmt.Println(x)  // "2"
+
+==================
+The new() function (rarely used)
+==================
+Another way to create a variable is to use the built-in function new(T).
+The expression new(T) creates an unnamed variable of typ e T, initializes it to the zero value of T, 
+and returns its address, which is a value of type *T.
+
+var p *int = new(int)
+
+Note: The new function is relatively rarely used because the most common unnamed variables are of
+struct types, for which the struct literal syntax (§4.4.1) is more flexible.
 
 =========
 for loops
@@ -176,6 +284,39 @@ for {
   // ...
 }
 
+================
+Switch statement
+================
+// The result of calling coinflip is compared to the value of each case.
+
+switch coinflip() {
+case "heads":
+  heads++
+case "tails":
+  tails++
+default:
+  fmt.Println("landed on edge!")
+}
+
+func Signum(x int) int {
+  switch {
+  case x > 0:
+    return +1
+  default:
+    return 0
+  case x < 0:
+    return -1
+  }
+}
+
+================
+Blank identifier (the underscore)
+================
+
+We can assign unwanted values to the blank identifier:
+  _, err = io.Copy(dst, src) // discard byte count
+  _, ok = x.(T) // check type but discard result
+
 =======================
 Printf Escape Sequences
 =======================
@@ -186,7 +327,7 @@ fmt.Printf("%.2f, %T\n", x, x) //123456.79, float64
 str := fmt.Sprintf("Sprintf = %.2f\n", x)
 fmt.Print(str)  //Sprintf = 123456.79
 
-The default format for %v is:
+The DEFAULT format for %v is:
 
 bool:                    %t   //the word true or false
 int, int8 etc.:          %d   //base 10
@@ -195,4 +336,18 @@ float32, complex64, etc: %g   //float with decimal point (with exponent for larg
 string:                  %s   //the uninterpreted bytes of the string or slice
 chan:                    %p   //pointer - base 16 notation, with leading 0x 
 pointer:                 %p   //base 16 notation, with leading 0x
+
+=======
+Formats
+=======
+%d decimal integer
+%x, %o, %b integer in hexadecimal, octal, binary
+%f, %g, %e floating-point number: 3.141593 3.141592653589793 3.141593e+00
+%t boolean: true or false
+%c rune (Unicode code point)
+%s string
+%q quoted string "abc" or rune 'c'
+%v any value in a natural format
+%T type of any value
+%% literal percent sign (no operand)
 
