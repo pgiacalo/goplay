@@ -29,8 +29,8 @@ func main() {
 	fmt.Printf("Type of s3=%T\n", s3) // Type of s3=[]int
 
 	//4) Declare a slice and initialize without values with a length and (optional) capacity
-	length := 5
-	capacity := 10
+	length := 2
+	capacity := 3
 	s4 := make([]int, length, capacity)
 	fmt.Printf("Type of s4=%T\n", s4)         // Type of s4=[]int
 	fmt.Printf("s4 length = %v\n", len(s4))   // s4 length = 5
@@ -40,6 +40,10 @@ func main() {
 	fmt.Printf("Type of s5=%T\n", s5)         // Type of s5=[]int
 	fmt.Printf("s5 length = %v\n", len(s5))   // s5 length = 5
 	fmt.Printf("s5 capacity = %v\n", cap(s5)) // s5 capacity = 5
+
+	fmt.Printf("address of s5 before append = %p, %v\n", &s5, s5) //
+	s5 = append(s5, 500, 600, 700, 800, 900, 1000, 2000)
+	fmt.Printf("address of s5 after append  = %p, %v\n", &s5, s5) //
 
 	//an array is declared by specifying the length within the square brackets
 	array := [3]string{"gold", "silver", "bronze"}
@@ -65,6 +69,7 @@ func main() {
 	fmt.Printf("Type of text=%T\n", text) // Type of text=main.LinesOfText
 	fmt.Printf("text=%v\n", text)         // text=[[78 111 119 32 105 115 32 116 104 ...
 	fmt.Printf("text=%s\n", text)         // text=[Now is the time for all good gophers to bring some fun to the party.]
+	fmt.Printf("text=%q\n", text)         // text=["Now is the time" "for all good gophers" "to bring some fun to the party."]
 
 	var matrix Transform
 	fmt.Printf("matrix=%v\n", matrix) // matrix=[[0 0 0] [0 0 0] [0 0 0]]

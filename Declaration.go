@@ -9,7 +9,8 @@ type Circle struct {
 }
 
 func main() {
-	var c Circle                     // c is of type main.Circle
+	var c Circle // c is of type main.Circle
+	//the use of new() is discouraged
 	var d *Circle = new(Circle)      // d is a pointer of type *main.Circle
 	var e = Circle{x: 0, y: 0, r: 5} // e is of type main.Circle
 

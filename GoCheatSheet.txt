@@ -111,9 +111,20 @@ make(): The built-in function make(T, args) is used to create slices, maps, and 
 Arrays and Slices
 =================
 
+  //an array is declared by specifying the length within the square brackets
+  array := [3]string{"gold", "silver", "bronze"}
+  fmt.Printf("Type of array=%T\n", array) // Type of array=[3]string
+
+  //a slice is declared by NOT specifying the length within the square brackets
+  slice := []string{"gold", "silver", "bronze"}
+  fmt.Printf("Type of slice=%T\n", slice) // Type of slice=[]string
+
+An array is a fixed-length sequence of zero or more elements of a particular type. 
+Because of their fixed length, arrays are rarely used directly in Go.
+
     Declare and assign array values:
 
-        medals := []string{"gold", "silver", "bronze"}
+        medals := [3]string{"gold", "silver", "bronze"}
         fmt.Println(medals)   //[gold silver bronze]
           
     The above declaration also assigns each element, as if it had been written like this:
@@ -123,6 +134,27 @@ Arrays and Slices
         medals[2] = "bronze"
         fmt.Println(medals)   //[gold silver bronze]
 
+Slices
+------
+Slices represent variable-length sequences whose elements all have the same type. 
+A slice type is written []T, where the elements have type T; it looks like an array type WITHOUT a size.
+
+Four ways to declare a slice:
+  1)  s := []int{1,2,3,4} //initialize with values
+
+  2)  s := []int{}        //NOT RECOMMENDED. initialize without values (memory is allocated)
+
+  3)  var s []int         //declare a slice but don't allocate memory just yet
+
+  4)  s := make([]int, length, capacity)  //initialize without values with a length and capacity
+
+    A slice is declared without a size within the square brackets
+
+      slice := []string{"gold", "silver", "bronze"}
+      fmt.Printf("Type of slice=%T\n", slice)   // Type of slice=[]string
+
+      s := make([]int, length, capacity)
+
     Because slices are variable-length, it is possible to have each inner slice be a different length. 
 
         text := LinesOfText{
@@ -131,7 +163,7 @@ Arrays and Slices
           []byte("to bring some fun to the party."),
         }
 
-        // Example of a 2-Dimensional Array/Slice (for a transformation matrix)
+        // Example of a 2-Dimensional Array (for a transformation matrix)
         type Transform [3][3]float64  // A 3x3 array, really an array of arrays. 
 
         // Example of a 2-Dimensional Array/Slice to store array of pixels for a picture
@@ -175,6 +207,15 @@ to and from their string representations, and functions for quoting and unquotin
 
 "unicode package - provides functions like IsDigit, IsLetter, IsUpper, and IsLower for
 classifying runes. Each function takes a single rune argument and returns a boolean.
+
+
+=========
+Constants
+=========
+The underlying type of every constant is a basic type: boolean, string, or number.
+
+const BoilingPointC = 100
+const FreezingPointC = 0
 
 
 =========================
@@ -337,17 +378,20 @@ string:                  %s   //the uninterpreted bytes of the string or slice
 chan:                    %p   //pointer - base 16 notation, with leading 0x 
 pointer:                 %p   //base 16 notation, with leading 0x
 
-=======
-Formats
-=======
-%d decimal integer
+=============
+Formats verbs   https://golang.org/pkg/fmt/
+=============
+%p  address of 0th element in base 16 notation, with leading 0x (p for pointer)
+%d  decimal integer
 %x, %o, %b integer in hexadecimal, octal, binary
 %f, %g, %e floating-point number: 3.141593 3.141592653589793 3.141593e+00
-%t boolean: true or false
-%c rune (Unicode code point)
-%s string
-%q quoted string "abc" or rune 'c'
-%v any value in a natural format
-%T type of any value
-%% literal percent sign (no operand)
+%t  boolean: true or false
+%c  rune (Unicode code point)
+%s  string (string and slice of bytes)
+%q  quoted string "abc" or rune 'c'
+%v  any value in a natural format
+%+v for structs, the plus flag (%+v) adds field names
+%#v a Go-syntax representation of the value
+%T  type of any value
+%%  literal percent sign (no operand)
 
