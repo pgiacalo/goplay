@@ -1,12 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"time"
-
-	"github.com/jinzhu/gorm"
-)
-
 // Uses GORM Object Relational Mapper
 
 // Youtube lesson on GORM
@@ -42,7 +35,7 @@ func main() {
 	}
 	fmt.Printf("Ping complete, err=%v\n", err)
 
-	//AutoMigrate will only create database tables if they do NOT already exist
+	//AutoMigrate will create the database tables (only if they do NOT already exist)
 	db.AutoMigrate(&Owner{}, &Book{}, &Author{})
 
 	//db.SingularTable(true)

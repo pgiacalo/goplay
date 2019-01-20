@@ -12,6 +12,15 @@ func init() {
 	fmt.Println("ArraySlices init() called")
 }
 
+//variadic function that takes zero to many int arguments
+func add(args ...int) int {
+	total := 0
+	for _, v := range args {
+		total += v
+	}
+	return total
+}
+
 func main() {
 
 	//There are 4 ways to declare a slice:
@@ -19,6 +28,9 @@ func main() {
 	//1) Declare a slice and initialize with values
 	s1 := []int{1, 2, 3, 4}
 	fmt.Printf("Type of s1=%T\n", s1) // Type of s1=[]int
+
+	total := add(s1...)
+	fmt.Printf("Total of s1=%v\n", total)
 
 	//2) NOT RECOMMENDED. initialize without values (memory is allocated)
 	s2 := []int{}
@@ -58,6 +70,10 @@ func main() {
 	//a slice is declared without a size within the square brackets
 	slice := []string{"gold", "silver", "bronze"}
 	fmt.Printf("Type of slice=%T\n", slice) // Type of slice=[]string
+
+	more := []string{"we", "all", "live", "in", "a", "yellow", "submarine"}
+	slice = append(slice, (more)...)
+	fmt.Println(slice)
 
 	//Because slices are variable-length, it is possible to have each inner slice be a different length.
 
