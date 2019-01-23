@@ -14,10 +14,11 @@ func main() {
 	b := make(chan string, 10)      //channel for string messages (size 10)
 	c := time.Tick(1 * time.Second) //channel for time ticks sent once per second
 
-	count := 0
-	total := 0
+	count := 0 //message count between clock ticks
+	total := 0 //total message count
+
 	start := time.Now()
-	stop := start.Add(5 * time.Second)
+	stop := start.Add(5 * time.Second) //we'll stop counting after 5 seconds
 
 	//put the message into channel a
 	a <- "Now is the time for all good men to come to the aid of their country!"
