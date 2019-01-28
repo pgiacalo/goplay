@@ -43,10 +43,11 @@ type Subscriber struct {
 	msgchan chan message
 }
 
-// NewPublisher starts and returns a new Publisher object.
+// NewPublisher creates, starts and returns a new Publisher object.
 // The returned Publisher is waiting for messages to arrive via its inchan
 // and will publish those messages via its outchan to all subscribers.
 func NewPublisher() Publisher {
+	//create the new publisher
 	inchan := make(chan interface{})
 	outchan := make(chan message, 1)
 	p := Publisher{
@@ -54,6 +55,7 @@ func NewPublisher() Publisher {
 		outchan: outchan,
 	}
 
+	//start the publisher
 	go func() {
 		for {
 			select {
@@ -70,6 +72,7 @@ func NewPublisher() Publisher {
 		}
 	}()
 
+	//return the publisher
 	return p
 }
 
@@ -79,10 +82,10 @@ func (p Publisher) Subscribe() Subscriber {
 	return Subscriber{p.outchan}
 }
 
-// Publish publications to all listeners.
-func (p Publisher) Publish(v interface{}) {
+// Publish publishes messages (m) to all subscribers.
+func (p Publisher) Publish(m interface{}) {
 	//put the message (v) into the publisher's inchan
-	p.inchan <- v
+	p.inchan <- m
 }
 
 // Read reads a message value that has been published, waiting until one is available if necessary.
@@ -126,8 +129,9 @@ func listen(id int, s Subscriber) {
 }
 
 var msgsToSend = 5
+var numberOfSubscribers = 4
 var msgCounter = 0
-var msgCollection []interface{} = make([]interface{}, 4*msgsToSend) //4 subscribers
+var msgCollection []interface{} = make([]interface{}, numberOfSubscribers*msgsToSend)
 
 // setup 2 separate publicationers (i.e., two separate publisher topics)
 var pa = NewPublisher()
@@ -167,6 +171,7 @@ func main() {
 	}
 }
 
+//publishes simple messages
 func sendA(qty int) {
 	for i := 0; i < qty; i++ {
 		msgA := messageA{i, "Msg A"}
@@ -177,6 +182,7 @@ func sendA(qty int) {
 	pa.Publish(nil)
 }
 
+//publishes nested messages
 func sendB(qty int) {
 	for i := 0; i < qty; i++ {
 		msgA := messageA{i, "Embedded msg A"}
