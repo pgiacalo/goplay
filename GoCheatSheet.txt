@@ -21,7 +21,7 @@ Functions: make len cap new append copy close delete complex real imag panic rec
 Declarations
 ------------
 There are four major kinds of declarations: 
-  var, const, type, and func
+  var, func, type, and const 
 
 ==========================
 Type declaration (structs)
@@ -37,6 +37,43 @@ type Circle struct {
 type Circle struct {
   x, y, r float64
 }
+
+===========================
+func declaration (functions)
+===========================
+func <function_name>(<arg_names> <arg_types>, ...) (<return_types>, ...) {
+  //function implementation
+}
+
+===================
+Method declarations 
+===================
+Methods are functions that belong to an instance of a specific type (i.e., the "receiver" type).
+Methods are called as follows: type_instance.method_name(args)
+
+// Methods with pointer receivers CAN modify the value to which the receiver points.
+// Since methods often need to modify their receiver, pointer receivers are more common than value receivers.
+func (p *Person) MethodWithSideEffect(first string, last string) {
+  p.FirstName = first
+  p.LastName = last
+}
+
+//calling the above method (p is a Person object)
+(&p).MethodWithSideEffect("Brian", "Greene")
+
+--------
+
+// Methods with value receivers can NOT modify the value to which the receiver points.
+// With a value receiver, the method operates on a copy of the original Vertex value.
+// (This is the same behavior as for any other value function argument)
+func (p Person) MethodWithoutSideEffect(first string, last string) Person {
+  p.FirstName = first
+  p.LastName = last
+  return p
+}
+
+//calling the above (p is a Person object)
+m := p.MethodWithoutSideEffect("Little", "Richard")
 
 ==============
 Embedded Types (inheritance)

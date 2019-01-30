@@ -13,10 +13,11 @@ type Person struct {
 Methods with pointer receivers CAN modify the value to which the receiver points.
 Since methods often need to modify their receiver, pointer receivers are more common than value receivers.
 */
-func (p *Person) MethodWithSideEffect(first string, last string) {
+func (p *Person) MethodWithSideEffect(first string, last string) string {
 	fmt.Printf("MethodWithSideEffect(): Type of Person, p %T\n", p)
 	p.FirstName = first
 	p.LastName = last
+	return "middleName"
 }
 
 /*

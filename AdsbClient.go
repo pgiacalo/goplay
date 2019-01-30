@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"strconv"
 	"time"
 
 	//"flag"
@@ -66,8 +67,8 @@ type adsbMsg struct {
 	Altitude             int     //Field 12: Mode C altitude. Height relative to 1013.2mb (Flight Level). Not height AMSL..
 	GroundSpeed          int     //Field 13: Speed over ground (not indicated airspeed)
 	Track                int     //Field 14: Track of aircraft (not heading). Derived from the velocity E/W and velocity N/S
-	Latitude             float32 //Field 15: North and East positive. South and West negative.
-	Longitude            float32 //Field 16: North and East positive. South and West negative.
+	Latitude             float64 //Field 15: North and East positive. South and West negative.
+	Longitude            float64 //Field 16: North and East positive. South and West negative.
 	VerticalRate         int     //Field 17: 64ft resolution
 	Squawk               string  //Field 18: Assigned Mode Person squawk code.
 	Alert                string  //Field 19: (Squawk change)	 Flag to indicate squawk has changed.
@@ -113,33 +114,55 @@ func main() {
 
 		fmt.Print("Message received from dump1090 socket: " + message)
 		var aMessage []string = strings.Split(message, ",")
-		var msg adsbMsg = adsbMsg{
-			MessageType: aMessage[0],
-			//TransmissionType:     strconv.Atoi(aMessage[1]),
-			//SessionID : aMessage[2],
-			AircraftID:           aMessage[3],
-			HexIdent:             aMessage[4],
-			FlightID:             aMessage[5],
-			DateMessageGenerated: aMessage[6],
-			TimeMessageGenerated: aMessage[7],
-			DateMessageLogged:    aMessage[8],
-			TimeMessageLogged:    aMessage[9],
-			Callsign:             aMessage[10],
-			//Altitude:             aMessage[11],
-			//GroundSpeed:          aMessage[12],
-			//Track:                aMessage[13],
-			//Latitude:             aMessage[14],
-			//Longitude:            aMessage[15],
-			//VerticalRate:         aMessage[16],
-			Squawk:     aMessage[17],
-			Alert:      aMessage[18],
-			Emergency:  aMessage[19],
-			SPI:        aMessage[20],
-			IsOnGround: aMessage[21],
-		}
+		var msg adsbMsg = createAdsbMsg(aMessage)
+
 		aircraftMsgTypeCount[Key{aMessage[3], aMessage[0]}]++
 
-		fmt.Printf("msg:%v\n", msg)
-
+		fmt.Printf("msg:%+v\n", msg)
 	}
+}
+
+func createAdsbMsg(aMessage []string) adsbMsg {
+	var msg adsbMsg = adsbMsg{
+		MessageType:          aMessage[0],
+		TransmissionType:     getInt(aMessage[1]),
+		SessionID:            getInt(aMessage[2]),
+		AircraftID:           aMessage[3],
+		HexIdent:             aMessage[4],
+		FlightID:             aMessage[5],
+		DateMessageGenerated: aMessage[6],
+		TimeMessageGenerated: aMessage[7],
+		DateMessageLogged:    aMessage[8],
+		TimeMessageLogged:    aMessage[9],
+		Callsign:             aMessage[10],
+		Altitude:             getInt(aMessage[11]),
+		GroundSpeed:          getInt(aMessage[12]),
+		Track:                getInt(aMessage[13]),
+		Latitude:             getFloat(aMessage[14]),
+		Longitude:            getFloat(aMessage[15]),
+		VerticalRate:         getInt(aMessage[16]),
+		Squawk:               aMessage[17],
+		Alert:                aMessage[18],
+		Emergency:            aMessage[19],
+		SPI:                  aMessage[20],
+		IsOnGround:           aMessage[21],
+	}
+	return msg
+}
+
+func getInt(str string) int {
+	value, err := strconv.Atoi(str)
+	if err != nil {
+		return -1
+	}
+	return value
+}
+
+func getFloat(str string) float64 {
+	// fmt.Println("getFloat: %s", str)
+	value, err := strconv.ParseFloat(str, 32)
+	if err != nil {
+		return -1
+	}
+	return value
 }

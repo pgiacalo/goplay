@@ -39,6 +39,10 @@ func main() {
 	//3) Declare a slice but don't allocate memory just yet
 	var s3 []int
 	fmt.Printf("Type of s3=%T\n", s3) // Type of s3=[]int
+	s3 = append(s3, 1)
+	s3 = append(s3, 2)
+	s3 = append(s3, 3)
+	fmt.Printf("Contents of s3=%v\n", s3) // Type of s3=[]int
 
 	//4) Declare a slice and initialize without values with a length and (optional) capacity
 	length := 2
