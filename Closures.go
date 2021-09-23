@@ -23,6 +23,7 @@ func adder() func(int) int {
 }
 
 func main() {
+	//
 	//pos and neg are variables that refer to the 2 functions/closures returned by adder()
 	//note how the values of sum persist (independently) for each of the 2 closures.
 	pos, neg := adder(), adder()
