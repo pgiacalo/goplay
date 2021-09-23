@@ -43,12 +43,12 @@ func main() {
 	//db.CreateTable(&Owner{}, &Book{}, &Author{})
 
 	owner := Owner{
-		FirstName: "Joe",
-		LastName:  "Blow",
+		FirstName: "Mickey",
+		LastName:  "Mouse",
 	}
 	db.Create(&owner)
 
-	owner.LastName = "Smith"
+	owner.LastName = "Mantle"
 	db.Debug().Save(&owner)
 	//
 	//db.Debug().Delete(&owner)

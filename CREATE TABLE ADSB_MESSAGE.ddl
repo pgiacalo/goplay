@@ -15,12 +15,12 @@ CREATE TABLE ADSB_MESSAGE (
 	Track                SMALLINT,     --Field 14: Track of aircraft (not heading). Derived from the velocity E/W and velocity N/S
 	Latitude             NUMERIC(5,3),  --Field 15: North and East positive. South and West negative. (e.g., 36.373)
 	Longitude            NUMERIC(6,3),  --Field 16: North and East positive. South and West negative. (e.g., -120.397)
-	VerticalRate         SMALLINT,           --Field 17: 64ft resolution
+	VerticalRate         SMALLINT,      --Field 17: 64ft resolution
 	Squawk               VARCHAR(10),   --Field 18: Assigned Mode Person squawk code.
 	Alert                VARCHAR(10),   --Field 19: (Squawk change)	 Flag to indicate squawk has changed.
 	Emergency            VARCHAR(10),   --Field 20: Flag to indicate emergency code has been set
 	SPI                  VARCHAR(10),   --Field 21: (Ident Flag to indicate transponder Ident has been activated.
 	IsOnGround           VARCHAR(10),   --Field 22: Flag to indicate ground squat switch is active
-    TS_Local             TIMESTAMP with time zone DEFAULT now(),                 --Additional field. Local timestamp when the message was received.
-    TS_UTC               TIMESTAMP with time zone DEFAULT timezone('UTC', now()) --Additional field. UTC timestamp when the message was received.
+  TS_Local             TIMESTAMP with time zone DEFAULT now(),                 --Additional field. Local timestamp when the message was received.
+  TS_UTC               TIMESTAMP with time zone DEFAULT timezone('UTC', now()) --Additional field. UTC timestamp when the message was received.
 );

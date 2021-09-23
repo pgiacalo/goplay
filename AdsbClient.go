@@ -122,6 +122,27 @@ func main() {
 	}
 }
 
+// mergeAdsbMsgs takes the field data from the newest arriving adsbMsg and merges it
+// with field data from the prior arriving adsbMsg (if any), retuning a new adsbMsg containing
+// a merger of the field values from both. This achieves a combined rollup of values
+// over time.
+//func mergeAdsbMsgs(latestMsg adsbMsg) (adsbMsg, error) {
+//	if latestMsg == nil {
+//		return errors.New("mergeAdsbMsgs() given a nil message.")
+//	}
+//	// acId := newMsg.AircraftID
+//	return latestMsg
+//	//TBD finish logic to pop the prior latest adsb msg for the aircraft ID.
+//
+//	// if oldMsg == nil && newMsg != nil {
+//	// 	//this is the very first
+//	// 	return clone(newMsg)
+//	// }
+//	// mergedMsg =: clone(oldMsg)
+//}
+
+// createAdsbMsg - creates an adsbMsg object by parsing and converting
+// the values in the given string array into the correct types.
 func createAdsbMsg(aMessage []string) adsbMsg {
 	var msg adsbMsg = adsbMsg{
 		MessageType:          aMessage[0],

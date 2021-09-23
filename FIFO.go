@@ -25,10 +25,40 @@
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
+//
+//  queue.go
+//
+//  Created by Hicham Bouabdallah
+//  Copyright (c) 2012 SimpleRocket LLC
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the "Software"), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
 
-package junk
+package main
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type queuenode struct {
 	data interface{}
@@ -118,15 +148,52 @@ func (q *Queue) Peek() interface{} {
 }
 
 // Empties the Queue
+// go-routine safe.
 func (q *Queue) Clear() {
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	for {
-		n := q.head
-		if n == nil {
+		if q.head == nil {
 			return
 		}
-		q.Pull()
+
+		n := q.head
+		q.head = n.next
+
+		if q.head == nil {
+			q.tail = nil
+		}
+		q.count--
+	}
+}
+
+func main() {
+	q := NewQueue()
+	q.Push(1)
+	q.Push(2)
+	q.Push(3)
+	q.Push(4)
+	q.Push(5)
+
+	//fmt.Println(q.Peek())
+	fmt.Println(q.Pull())
+	fmt.Println(q.Pull())
+
+	fmt.Println(q.Peek())
+
+	q.Clear()
+
+	fmt.Println(q.Peek())
+
+	q.Push(6)
+	q.Push(7)
+
+	for {
+		n := q.Pull()
+		if n == nil {
+			break
+		}
+		fmt.Println(n)
 	}
 }

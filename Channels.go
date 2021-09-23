@@ -1,3 +1,8 @@
+// Go channels follow the Communicating Sequential Processes (CSP) pattern.
+// Channels are a point-to-point communication entity.
+// There is always ONE writer and ONE reader involved in each exchange.
+// Messages passed via channels are passed by copy (so very large messages should be avoided).
+
 package main
 
 import (

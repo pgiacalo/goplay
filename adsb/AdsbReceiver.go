@@ -1,4 +1,4 @@
-package adsb
+package main
 
 import (
 	"bufio"
@@ -110,7 +110,7 @@ var debug = false
 // var aircraftMsgTypeCount = make(map[Key]int)
 
 // Start starts the receiver
-func Start() {
+func main() {
 
 	dump1090SocketAddress := ipAddress + ":" + port
 
