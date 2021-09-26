@@ -1,3 +1,5 @@
+//This code was created after watching Rob Pike's youtube video on GoRoutines.
+//https://www.youtube.com/watch?v=f6kdp27TYZs
 package main
 
 import (
