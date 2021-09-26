@@ -1,5 +1,12 @@
 //This code was created after watching Rob Pike's youtube video on GoRoutines.
-//https://www.youtube.com/watch?v=f6kdp27TYZs
+//Slides: 	https://talks.golang.org/2012/concurrency.slide#1
+//Video: 	https://www.youtube.com/watch?v=f6kdp27TYZs
+//
+//Also, per Rob Pike's Concurrency is not Parallism talk:
+//	- Concurrency is about DEALING with a lot of things at once.
+//	- Parallelism is about DOING a lot of things at once.
+// 	Video: 	https://www.youtube.com/watch?v=oV9rvDllKEg:
+
 package main
 
 import (
