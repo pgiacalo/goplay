@@ -1,19 +1,47 @@
 package main
 
-//https://tour.golang.org/moretypes/25
-//Function closures
-//Go functions may be closures.
-// DEFINITION: A closure is a function value that references variables from outside its body.
-// The function may access and assign to the referenced variables;
-// in this sense the function is "bound" to the variables.
-// These referenced variables persist between calls to the closure.
-//
-//For example, the adder function returns a closure. Each closure is bound to its own sum variable
+import (
+	"fmt"
+)
 
-import "fmt"
+func main() {
+	b := html_tag("<b>", "</b>")
+	i := html_tag("<i>", "</i>")
+	p := html_tag("<p>", "</p>")
+	fmt.Println(b("bold"))      //<b>bold</b>
+	fmt.Println(i("italic"))    //<i>italic</i>
+	fmt.Println(p("paragraph")) //<p>paragraph</p>
 
-//add() returns a function that takes and int and returns and int
-//it is stateful, since the sum variable's value persists between calls (since this is a closure)
+	c1 := count(0)
+	c2 := count(10)
+	fmt.Println(c1(), c1()) //1 2
+	fmt.Println(c1(), c1()) //3 4
+	fmt.Println(c2(), c2()) //11 12
+
+	sum := adder()
+	fmt.Println(sum(5), sum(10)) //5 15
+
+}
+
+func html_tag(opentag string, closetag string) func(string) string {
+	//definition: 	a closure is a function that remembers the variable(s)
+	//				from the environment in which it was created.
+	f := func(str string) string {
+		return opentag + str + closetag
+	}
+	return f
+}
+
+func count(start int) func() int {
+	//definition: 	a closure is a function that remembers the variable(s)
+	//				from the environment in which it was created.
+	f := func() int {
+		start++
+		return start
+	}
+	return f
+}
+
 func adder() func(int) int {
 	sum := 0
 	return func(x int) int {
@@ -21,39 +49,3 @@ func adder() func(int) int {
 		return sum
 	}
 }
-
-func main() {
-	//
-	//pos and neg are variables that refer to the 2 functions/closures returned by adder()
-	//note how the values of sum persist (independently) for each of the 2 closures.
-	pos, neg := adder(), adder()
-	for i := 0; i < 10; i++ {
-		fmt.Println(pos(i), neg(-2*i))
-	}
-}
-
-// --- Example 2 ---
-
-// package main
-
-// import "fmt"
-
-// func intSeq() func() int {
-// 	i := 0
-// 	return func() int {
-// 		i++
-// 		return i
-// 	}
-// }
-
-// func main() {
-
-// 	nextInt := intSeq()
-
-// 	fmt.Println(nextInt())
-// 	fmt.Println(nextInt())
-// 	fmt.Println(nextInt())
-
-// 	newInts := intSeq()
-// 	fmt.Println(newInts())
-// }
