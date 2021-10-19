@@ -1,3 +1,7 @@
+//DEFINITION:
+//	A closure is an anonymous function that remembers the variable(s)
+//	from the environment in which it was CREATED.
+
 package main
 
 import (
@@ -23,8 +27,7 @@ func main() {
 }
 
 func html_tagger(opentag string, closetag string) func(string) string {
-	//definition: 	a closure is a function that remembers the variable(s)
-	//				from the environment in which it was created.
+	//closure
 	f := func(str string) string {
 		return opentag + str + closetag
 	}
@@ -32,8 +35,7 @@ func html_tagger(opentag string, closetag string) func(string) string {
 }
 
 func counter(start int) func() int {
-	//definition: 	a closure is a function that remembers the variable(s)
-	//				from the environment in which it was created.
+	//closure
 	count := start - 1
 	f := func() int {
 		count++
@@ -44,6 +46,7 @@ func counter(start int) func() int {
 
 func adder() func(int) int {
 	sum := 0
+	//closure
 	return func(x int) int {
 		sum += x
 		return sum
