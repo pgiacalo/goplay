@@ -10,6 +10,7 @@ func statusUpdate() string {
 }
 
 func main() {
+	//func Tick(d Duration) <-chan Time
 	c := time.Tick(1 * time.Second)
 	for now := range c {
 		fmt.Printf("%v %s\n", now, statusUpdate())
