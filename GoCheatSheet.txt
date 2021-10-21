@@ -1,5 +1,11 @@
 Golang Cheat Sheet
 
+    ===================================================================
+    Don't communicate by sharing memory; share memory by communicating.
+    (example: https://golang.org/doc/codewalk/sharemem/)
+    ===================================================================
+
+
 ===========
 25 Keywords
 ===========
