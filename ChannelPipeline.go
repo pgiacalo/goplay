@@ -4,6 +4,7 @@ import (
     "fmt"
 )
 
+//The main function sets up the pipeline
 func main() {
     // Set up the pipeline.
     c := gen(2, 3)
@@ -12,4 +13,26 @@ func main() {
     // Consume the output.
     fmt.Println(<-out) // 4
     fmt.Println(<-out) // 9
+}
+
+func gen(nums ...int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for _, n := range nums {
+            out <- n
+        }
+        close(out)
+    }()
+    return out
+}
+
+func sq(in <-chan int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for n := range in {
+            out <- n * n
+        }
+        close(out)
+    }()
+    return out
 }

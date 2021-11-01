@@ -7,12 +7,12 @@ import (
 
 func main() {
     playTime := time.Duration(2) //seconds
-    count := counter(1)
+    next := counter(1)
     numberOfPlayers := 4
     var Ball int
     table := make(chan int)
     for i := 0; i < numberOfPlayers; i++ {
-        go player(table, count)
+        go player(table, next)
     }
 
     table <- Ball

@@ -23,4 +23,11 @@ func main() {
 	for temp := values.Front(); temp != nil; temp = temp.Next() {
 		fmt.Println(temp.Value)
 	}
+
+	// Remove the oldest 5 elements
+	for i := 0; i < 5; i++ {
+		e := values.Back()
+		values.Remove(e)
+	}
+
 }

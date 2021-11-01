@@ -10,38 +10,27 @@ import (
 // The result for this simple test is a message rate of ~6.5 million messages per second!
 func main() {
 	//create 3 channels (two for message passing and one for clock ticks)
-	a := make(chan int, 10)         //channel for string messages (size 10)
-	b := make(chan int, 10)         //channel for string messages (size 10)
+	a := make(chan string, 10)      //channel for string messages (size 10)
+	b := make(chan string, 10)      //channel for string messages (size 10)
 	c := time.Tick(1 * time.Second) //channel for time ticks sent once per second
 
 	count := 0 //message count between clock ticks
 	total := 0 //total message count
 
 	start := time.Now()
-	stop := start.Add(1 * time.Millisecond) //we'll stop counting after 5 seconds
+	stop := start.Add(5 * time.Second) //we'll stop counting after 5 seconds
 
 	//put the message into channel a
-	msg := 100
-	var pa *int = &msg
-	var pb *int
-
-	a <- msg
-	fmt.Printf("Into a: %p \n", &msg)
+	a <- "Now is the time for all good men to come to the aid of their country!"
 
 LabelA:
 	for {
 		select {
 		case msg := <-a:
-			pa = &msg
 			count++
 			total++
 			b <- msg
 		case msg := <-b:
-			pb = &msg
-			if pa != pb {
-				fmt.Println("DIFFERENT POINTER ADDRESS, %p, %p", pa, pb)
-				break LabelA
-			}
 			count++
 			total++
 			a <- msg

@@ -1,6 +1,4 @@
-//DEFINITION:
-//	A closure is an anonymous function that remembers the variable(s)
-//	from the environment in which it was CREATED.
+//DEFINITION: A closure is an anonymous function that remembers the variable(s) from the environment in which it was CREATED.
 
 package main
 

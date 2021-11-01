@@ -30,6 +30,7 @@ func main() {
 	go producer(produced, 0, (100 * time.Millisecond))
 	go producer(produced, 10000, (200 * time.Millisecond))
 	go producer(produced, 10000000, (300 * time.Millisecond))
+	//	close(produced)
 
 	//start one consumer that receives messages from the "consumed" channel
 	go consumer(consumed)
@@ -39,4 +40,5 @@ func main() {
 	for {
 		consumed <- <-produced
 	}
+
 }
