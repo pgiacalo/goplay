@@ -12,8 +12,9 @@ func main() {
 		Origin string
 	}
 
+	//A Bird has Animal characteristics
 	type Bird struct {
-		Animal //embedded fields are NOT given a name (A bird has animal characteristics)
+		Animal //anonymous embedded struct - this simplifies dereferencing field values later
 		Speed  int
 		CanFly bool
 	}
