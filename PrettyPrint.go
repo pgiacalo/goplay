@@ -25,5 +25,14 @@ func main() {
 		CanFly: false,
 	}
 
+	fmt.Printf("title: %v, words:%v, isbn:%v\n", b.text.title, b.text.wordCount, b.isbn)
+	//title: Romeo and Juliet, words:11657, isbn:1097834
+
 	fmt.Printf("%# v\n", pretty.Formatter(b))
+	/* pretty.Formatter output
+	main.book{
+	    text: main.text{title:"Romeo and Juliet", wordCount:11657},
+	    isbn: "1097834",
+	}
+	*/
 }
