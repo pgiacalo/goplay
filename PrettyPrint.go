@@ -26,14 +26,19 @@ func main() {
 		CanFly: false,
 	}
 
-	fmt.Printf("title: %v, words:%v, isbn:%v\n", b.text.title, b.text.wordCount, b.isbn)
-	//title: Romeo and Juliet, words:11657, isbn:1097834
+	fmt.Printf("name: %v, origin:%v, speed:%v, canfly:%v\n", b.Name, b.Origin, b.Speed, b.CanFly)
+	//name: emu, origin:Australia, speed:48, canfly:false
+
+	//Note: with anonymous embedding, there is no need to include the embedded field when dereferencing
+	fmt.Printf("name: %v, origin:%v, speed:%v, canfly:%v\n", b.Animal.Name, b.Animal.Origin, b.Speed, b.CanFly)
+	//name: emu, origin:Australia, speed:48, canfly:false
 
 	fmt.Printf("%# v\n", pretty.Formatter(b))
 	/* pretty.Formatter output
-	main.book{
-	    text: main.text{title:"Romeo and Juliet", wordCount:11657},
-	    isbn: "1097834",
+	main.Bird{
+	    Animal: main.Animal{Name:"emu", Origin:"Australia"},
+	    Speed:  48,
+	    CanFly: false,
 	}
 	*/
 }
