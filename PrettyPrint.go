@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/kr/pretty"
 )
 
@@ -29,11 +31,13 @@ func main() {
 	fmt.Printf("name: %v, origin:%v, speed:%v, canfly:%v\n", b.Name, b.Origin, b.Speed, b.CanFly)
 	//name: emu, origin:Australia, speed:48, canfly:false
 
-	//Note: with anonymous embedding, there is no need to include the embedded field when dereferencing
+	//Note: with anonymous embedding, the embedded field name is not needed when dereferencing (unless the outer struct also uses the same field name)
 	fmt.Printf("name: %v, origin:%v, speed:%v, canfly:%v\n", b.Animal.Name, b.Animal.Origin, b.Speed, b.CanFly)
 	//name: emu, origin:Australia, speed:48, canfly:false
 
 	fmt.Printf("%# v\n", pretty.Formatter(b))
+
+	fmt.Println(time.Now())
 	/* pretty.Formatter output
 	main.Bird{
 	    Animal: main.Animal{Name:"emu", Origin:"Australia"},
