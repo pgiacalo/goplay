@@ -20,19 +20,48 @@ Predeclared names
 -----------------
 
 Constants: true false iota nil
+
 Types:  int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64 uintptr 
         float32 float64 complex128 complex64 bool byte rune string error
+
 Functions: make len cap new append copy close delete complex real imag panic recover
 
+
+===============================
+Reference Types and Value Types
+===============================
+
+Reference Types:
+  maps
+  slices
+  channels
+  functions
+  methods
+
+Value Types:
+  arrays
+  structs
+  bool
+  string
+  int  int8  int16  int32  int64
+  float32 float64
+  uint uint8 uint16 uint32 uint64 uintptr
+  complex64 complex128
+  byte    //alias for uint8
+  rune    //alias for int32 (represents a Unicode code point)
+
+============
 Declarations
-------------
+============
+
 There are four major kinds of declarations: 
   var, func, type, and const 
 
 ==========================
 Type declaration (structs)
 ==========================
-A struct's fields usually represent the "has-a" relationship. For example a Circle has an x,y location and a radius. 
+A struct's fields usually represent the "has-a" relationship. 
+For example a Circle has an x,y location and a radius. 
 
 type Circle struct {
   x float64
@@ -43,6 +72,28 @@ type Circle struct {
 type Circle struct {
   x, y, r float64
 }
+
+//create and initialize a new Circle
+c := Circle {
+  x: 1,
+  y: 2, 
+  r: 3,
+}
+fmt.Printf("Circle c = %+v", c)   // Circle c = {x:1 y:2 r:3}
+
+
+================
+Type conversions
+================
+
+The expression T(v) converts the value v to the type T.
+
+  i := 42
+  f := float64(i)
+  u := uint(f)
+
+In Go, assignment between items of different type requires an explicit conversion. 
+
 
 ===========================
 func declaration (functions)
@@ -56,6 +107,10 @@ Method declarations
 ===================
 Methods are functions that belong to an instance of a specific type (i.e., the "receiver" type).
 Methods are called as follows: type_instance.method_name(args)
+
+func (receiver_type) <method_name>(<arg_name> <arg_type>, ...) (<return_types>, ...) {
+  //method implementation
+}
 
 // Methods with pointer receivers CAN modify the value to which the receiver points.
 // Since methods often need to modify their receiver, pointer receivers are more common than value receivers.
@@ -153,7 +208,9 @@ make(): The built-in function make(T, args) is used to create slices, maps, and 
 =================
 Arrays and Slices
 =================
-
+Arrays are VALUE types. Also, the size of the array if fixed and is a part of the type. 
+  - e.g., an array of 4 integers is a different type than an array of 5 integers -- [4]int ≠ [5]int
+  
   //an array is declared by specifying the length within the square brackets
   array := [3]string{"gold", "silver", "bronze"}
   fmt.Printf("Type of array=%T\n", array) // Type of array=[3]string
@@ -179,6 +236,7 @@ Because of their fixed length, arrays are rarely used directly in Go.
 
 Slices
 ------
+Slices are REFERENCE types.
 Slices represent variable-length sequences whose elements all have the same type. 
 A slice type is written []T, where the elements have type T; it looks like an array type WITHOUT a size.
 
@@ -394,6 +452,20 @@ func Signum(x int) int {
 }
 
 ================
+Type Switch 
+================
+
+var i interface{} = "Hello World"
+switch i.(type) {
+case int:
+  fmt.Println("i is an int")
+case string:
+  fmt.Println("i is an string")   //the output at runtime
+default:
+  fmt.Println("i is an unknown type")}
+
+
+================
 Blank identifier (the underscore)
 ================
 
@@ -421,20 +493,22 @@ string:                  %s   //the uninterpreted bytes of the string or slice
 chan:                    %p   //pointer - base 16 notation, with leading 0x 
 pointer:                 %p   //base 16 notation, with leading 0x
 
-=============
-Formats verbs   https://golang.org/pkg/fmt/
-=============
-%p  address of 0th element in base 16 notation, with leading 0x (p for pointer)
+================
+fmt Format verbs   https://golang.org/pkg/fmt/
+================
+%p  pointers - address of 0th element in base 16 notation, with leading 0x
 %d  decimal integer
-%x, %o, %b integer in hexadecimal, octal, binary
-%f, %g, %e floating-point number: 3.141593 3.141592653589793 3.141593e+00
+%f, %g, %e float, double or exponential notation: 3.141593 3.141592653589793 3.141593e+00
 %t  boolean: true or false
-%c  rune (Unicode code point)
+%c  character - a rune (Unicode code point)
 %s  string (string and slice of bytes)
 %q  quoted string "abc" or rune 'c'
 %v  any value in a natural format
 %+v for structs, the plus flag (%+v) adds field names
 %#v a Go-syntax representation of the value
 %T  type of any value
+%x  hexadecimal 
+%o  octal 
+%b  binary 
 %%  literal percent sign (no operand)
 
