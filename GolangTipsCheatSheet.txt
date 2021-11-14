@@ -1,0 +1,1290 @@
+Golang Cheat Sheet
+
+    ===================================================================
+    Don't communicate by sharing memory; share memory by communicating.
+    (example: https://golang.org/doc/codewalk/sharemem/)
+    ===================================================================
+
+
+===========
+25 Keywords
+===========
+
+break        default      func         interface    select
+case         defer        go           map          struct
+chan         else         goto         package      switch
+const        fallthrough  if           range        type
+continue     for          import       return       var
+
+Predeclared names
+-----------------
+
+Constants: true false iota nil
+
+Types:  int int8 int16 int32 int64 uint uint8 uint16 uint32 uint64 uintptr 
+        float32 float64 complex128 complex64 bool byte rune string error
+
+Functions: make len cap new append copy close delete complex real imag panic recover
+
+===============================
+Reference Types and Value Types
+===============================
+
+Reference Types:
+  maps
+  slices
+  channels
+  functions
+  methods
+
+Value Types:
+  arrays
+  structs
+  bool
+  string
+  int  int8  int16  int32  int64
+  float32 float64
+  uint uint8 uint16 uint32 uint64 uintptr
+  complex64 complex128
+  byte    //alias for uint8
+  rune    //alias for int32 (represents a Unicode code point)
+
+============
+Declarations
+============
+
+There are four major kinds of declarations: 
+  var, func, type, and const 
+
+==========================
+Type declaration (structs)
+==========================
+A struct's fields usually represent the "has-a" relationship. 
+For example a Circle has an x,y location and a radius. 
+
+type Circle struct {
+  x float64
+  y float64
+  r float64
+}
+	==or==
+type Circle struct {
+  x, y, r float64
+}
+
+//create and initialize a new Circle
+c := Circle {
+  x: 1,
+  y: 2, 
+  r: 3,
+}
+fmt.Printf("Circle c = %+v", c)   // Circle c = {x:1 y:2 r:3}
+
+================
+Type conversions
+================
+
+The expression T(v) converts the value v to the type T.
+
+  i := 42
+  f := float64(i)
+  u := uint(f)
+
+In Go, assignment between items of different type requires an explicit conversion. 
+
+var wc WriterCloser = NewBufferedWriteCloser()
+bwc := wc.(*BufferedWriterCloser)
+
+===========================
+func declaration (functions)
+===========================
+func <function_name>(<arg_names> <arg_types>, ...) (<return_types>, ...) {
+  //function implementation
+}
+
+===================
+Method declarations 
+===================
+Methods are functions that belong to an instance of a specific type (i.e., the "receiver" type).
+Methods are called as follows: type_instance.method_name(args)
+
+func (receiver_type) <method_name>(<arg_name> <arg_type>, ...) (<return_types>, ...) {
+  //method implementation
+}
+
+// Methods with pointer receivers CAN modify the value to which the receiver points.
+// Since methods often need to modify their receiver, pointer receivers are more common than value receivers.
+func (p *Person) MethodWithSideEffect(first string, last string) {
+  p.FirstName = first
+  p.LastName = last
+}
+
+//calling the above method (p is a Person object)
+(&p).MethodWithSideEffect("Brian", "Greene")
+
+--------
+
+// Methods with value receivers can NOT modify the value to which the receiver points.
+// With a value receiver, the method operates on a copy of the original Vertex value.
+// (This is the same behavior as for any other value function argument)
+func (p Person) MethodWithoutSideEffect(first string, last string) Person {
+  p.FirstName = first
+  p.LastName = last
+  return p
+}
+
+//calling the above (p is a Person object)
+m := p.MethodWithoutSideEffect("Little", "Richard")
+
+==============
+Embedded Types (inheritance)
+==============
+Embedded types within a struct can be used to represent the "is-a" relationship 
+
+type Person struct {
+  Name string
+}
+func (p *Person) Talk() {
+  fmt.Println("Hi, my name is", p.Name)
+}
+
+type Android struct {
+  Person		//an embedded type without a name represents the "is-a" relationship (an Android is-a type of Person)
+  Model string
+}
+a := Android{name: "R2D2"}
+a.Talk()
+
+==========================
+Initialization/Declaration (different ways)
+==========================
+
+var f *Circle = new(Circle)       //creates a Circle variable that is by default set to zero
+                                  //function new(T) returns a pointer to a newly allocated zero value of type T
+
+var c Circle		                  //creates a variable (c) of type Circle that is by default set to zero
+
+var c = Circle{x: 0, y: 0, r: 5}  //creates a variable (c) of type Circle with given initial values
+
+--- short form --- (ONLY inside of functions)
+c := new(Circle)	//allocates memory for all the fields, sets them all to their zero value and returns a pointer (*Circle) 
+
+c := Circle{x: 0, y: 0, r: 5}	//allocates memory, sets all the values, an object of type Circle
+
+The following are 3 equivalent ways to create an object and return a pointer to the object's address
+    // Allocate enough memory to store a bytes.Buffer value and return a pointer to the value's address.
+    var buf bytes.Buffer
+    p := &buf
+
+    // Use a composite literal to perform allocation and return a pointer to the value's address.
+    p := &bytes.Buffer{}
+
+    // Use the new() function to perform allocation, which will return a pointer to the value's address.
+    p := new(bytes.Buffer)    //note that new() is rarely used
+
+===============
+new() vs make()
+===============
+
+new():  The built-in function new(T) is rarely used. It allocates “zeroed” storage for a new item of type T.
+        It returns a pointer (*T) to a newly allocated zero value of type T. 
+
+        var x *int = new(int)
+
+make(): The built-in function make(T, args) is used to create slices, maps, and channels only.
+        It returns an initialized (not zeroed) value of type T (not *T). 
+
+        // Idiomatic:
+        v = make([]int, 10, 100)  //allocates an array of 100 ints and then creates a slice structure with length 10 and a 
+                                    capacity of 100 pointing at the first 10 elements of the array. 
+        v := make([]int, 10)     //the capacity can be omitted
+
+        make(map[string]int)        //makes a map of string (keys) to int (values)
+        make(map[string]int, 100)   //optional size: initial size 100 (that grows automatically)
+
+        make(chan int)              //makes a channel
+        make(chan int, 100)         //optional capacity 100
+
+=================
+Arrays 
+=================
+Arrays are VALUE types. The SIZE of an array is FIXED and is a PART OF THE TYPE. 
+  - e.g., an array of 4 integers is a different type than an array of 5 integers -- [4]int ≠ [5]int
+  
+  //an array is declared by specifying the length within the square brackets
+  array := [3]string{"gold", "silver", "bronze"}
+  fmt.Printf("Type of array=%T\n", array) // Type of array=[3]string
+
+An array is a fixed-length sequence of zero or more elements of a particular type. 
+Because of their fixed length, arrays are rarely used directly in Go.
+
+    Declare and assign array values:
+
+        medals := [3]string{"gold", "silver", "bronze"}
+        fmt.Println(medals)   //[gold silver bronze]
+          
+    The above declaration also assigns each element, as if it had been written like this:
+        var medals [3]string
+        medals[0] = "gold"
+        medals[1] = "silver"
+        medals[2] = "bronze"
+        fmt.Println(medals)   //[gold silver bronze]
+
+=========
+Slices
+=========
+Slices are REFERENCE types.
+Slices represent variable-length sequences whose elements all have the same type. 
+A slice type is written []T, where the elements have type T; it looks like an array type WITHOUT a size.
+
+A slice is declared by NOT specifying the length within the square brackets.
+
+  slice := []string{"gold", "silver", "bronze"}
+  fmt.Printf("Type of slice = %T\n", slice) // Type of slice = []string
+
+Four ways to declare a slice:
+  1)  s := []int{1,2,3,4} //initialize with values
+
+  2)  var s []int         //declare a slice but don't allocate memory just yet
+
+  3)  s := make([]int, length, capacity)  //initialize without values with a length and capacity
+
+  4)  s := []int{}        //NOT RECOMMENDED. initialize without values (memory is allocated)
+
+    Because slices are variable-length, it is possible to have each inner slice be a different length. 
+
+        text := LinesOfText{
+          []byte("Now is the time"),
+          []byte("for all good gophers"),
+          []byte("to bring some fun to the party."),
+        }
+
+        // Example of a 2-Dimensional Array (for a transformation matrix)
+        type Transform [3][3]float64  // A 3x3 array, really an array of arrays. 
+
+        // Example of a 2-Dimensional Array/Slice to store array of pixels for a picture
+        // Allocate the top-level slice
+        picture := make([][]uint8, YSize) // One row per unit of y.
+        // Loop over the rows, allocating the slice for each row.
+        for i := range picture {
+          picture[i] = make([]uint8, XSize)
+        }
+
+============================
+String and RUNE manipulation
+============================
+
+Four standard packages are particularly important for manipulating strings: 
+  bytes, strings, strconv, and unicode 
+
+"strings" package - provides many functions for searching, replacing, comparing , 
+trimming, splitting, and joining strings. It includes functions like ToUpper and ToLower, 
+that return a new string with the specified transformation applied.
+
+  Other functions in the "strings" package:
+    func Contains(s, substr string) bool
+    func Count(s, sep string) int
+    func Fields(s string) []string
+    func HasPrefix(s, prefix string) bool
+    func Index(s, sep string) int
+    func Join(a []string, sep string) string
+
+"strconv" package - provides functions for converting boolean, integer, and floating-point values 
+to and from their string representations, and functions for quoting and unquoting strings.
+
+  Other functions in the strconv package:
+    func Atoi
+    func Itoa
+    func ParseInt
+    func ParseUint
+    func ParseBool
+    func ParseFloat
+    func FormatInt
+
+"unicode" package - provides functions for classifying runes. 
+Each function takes a single rune argument and returns a boolean.
+    IsDigit
+    IsLetter
+    IsUpper
+    IsLower 
+
+
+=========
+Constants
+=========
+The underlying type of every constant is a basic type: boolean, string, or number.
+
+const BoilingPointC = 100
+const FreezingPointC = 0
+
+
+=========================
+iota - Constant Generator
+=========================
+
+The following example uses iota to declare Sunday to be 0, Monday to be 1, and so on.
+
+  type Weekday int
+
+  const (
+    Sunday Weekday = iota
+    Monday
+    Tuesday
+    Wednesday
+    Thursday
+    Friday
+    Saturday
+  )
+
+
+=========
+Functions
+=========
+// this function cannot modify the given Circle argument (because arguments are always copied in Go)
+func circleArea(c Circle) float64 {
+  return math.Pi * c.r*c.r
+}
+
+fmt.Println(circleArea(c))
+
+// in order to allow the function to modify the argument, it must be specified as a pointer, like this 
+func circleArea(c *Circle) float64 {
+  return math.Pi * c.r*c.r
+}
+
+fmt.Println(circleArea(&c))
+
+=======
+Methods (have receivers: Pointer Receivers or Value Receivers) 
+=======
+A special type of go function is known as a Method. 
+Methods have a "receiver" type specified between the keyword "func" and the name of the function. 
+
+// Value Receiver -- this method cannot modify the given Circle argument 
+func (c Circle) area() float64 {
+  return math.Pi * c.r*c.r
+}
+
+// Pointer Receiver -- this method CAN modify the given Circle argument 
+func (c *Circle) Area() float64 {
+  return math.Pi * c.r*c.r
+}
+
+By creating the function in this way it allows us to call the function using the . operator:
+
+fmt.Println(c.area())
+ ==or==
+fmt.Println((&c).Area())
+
+This is easier to read, we no longer need the & operator (Go automatically knows to pass a pointer to the circle)
+
+========
+Pointers
+========
+
+- The expression &x (‘address of x‘) yields a pointer to an integer variable, that is, a value of type *int, which is pronounced ‘pointer to int.' 
+- If this value is called p, we say ‘p points to x,' or equivalently ‘p contains the address of x.' 
+- The variable x to which p points is written *p. The expression *p yields the value at address p.
+- Since *p denotes a variable, it may also appear on the left-hand side of an assignment, in which case 
+the assignment updates the variable (x).
+
+x := 1          //variable delcaration
+p := &x         // p, of type *int, points to x (p is a pointer that holds the address of x)
+fmt.Println(*p) // "1"  (the value at p is still 1)
+*p = 2          // equivalent to x = 2 (the value at p now equals 2, so x equals 2)
+fmt.Println(x)  // "2"
+
+==================
+The new() function (rarely used)
+==================
+Another way to create a variable is to use the built-in function new(T).
+The expression new(T) creates an unnamed variable of typ e T, initializes it to the zero value of T, 
+and returns its address, which is a value of type *T.
+
+var p *int = new(int)
+
+Note: The new function is relatively rarely used because the most common unnamed variables are of
+struct types, for which the struct literal syntax (§4.4.1) is more flexible.
+
+=========
+for loops
+=========
+The for loop is the only loop statement in Go. It has a number of forms.
+
+for initialization; condition; post {
+  // zero or more statements
+}
+
+// a traditional "while" loop
+for condition {
+  // ...
+}
+
+// a traditional infinite loop
+for {
+  // ...
+}
+
+================
+Switch statement
+================
+// The result of calling coinflip is compared to the value of each case.
+
+switch coinflip() {
+case "heads":
+  heads++
+case "tails":
+  tails++
+default:
+  fmt.Println("landed on edge!")
+}
+
+func Signum(x int) int {
+  switch {
+  case x > 0:
+    return +1
+  default:
+    return 0
+  case x < 0:
+    return -1
+  }
+}
+
+================================
+Type Assertions [ variable.(T) ] and Type Conversions/Casting [ T(variable) ]
+
+The type of a variable in Go is fixed, and is the same as what you declared during its initialization.
+
+Each type in Go defines two things:
+
+1) Data structure - How the variable is stored (the underlying data structures)
+2) Behavior - What you can do with the variable (methods and functions it can be used in)
+
+- A type assertion brings out the concrete type underlying the interface. 
+- A type conversions change the way you can use a variable between two concrete types that have the same data structure.
+
+Type assertion example:
+-----------------------
+var greeting interface{} = "hello"
+greetingStr, ok := greeting.(string)    //ok = true if the assertion is correct/succeeds, else false
+
+Type assertions are used to assert that a variable is of some type. Type assertions can only take place on interfaces.
+This also implies that type assertions are performed at runtime.
+
+Type conversion example:
+------------------------
+greeting := []byte("hello world")
+greetingStr := string(greeting)
+
+When Can We Use Type Conversion?
+Type’s can only be converted between one another if the underlying data structure is the same.
+
+Type conversions give you compilation errors if you try to convert to the wrong type, as opposed to runtime errors and optional ok return values that type assertions give. 
+
+================
+Type Switch 
+================
+
+var i interface{} = "Hello World"
+switch i.(type) {                 //Note: this syntax ".(type_)" can ONLY be used in a switch statement
+case int:
+  fmt.Println("i is an int")
+case string:
+  fmt.Println("i is an string")   //the output at runtime
+default:
+  fmt.Println("i is an unknown type")}
+
+
+================
+Blank identifier (the underscore)
+================
+
+We can assign unwanted values to the blank identifier:
+  _, err = io.Copy(dst, src) // discard byte count
+  _, ok = x.(T) // check type but discard result
+
+=======================
+Printf Escape Sequences
+=======================
+
+var x float64 = 123456.7890001
+fmt.Printf("%.2f, %T\n", x, x) //123456.79, float64
+
+str := fmt.Sprintf("Sprintf = %.2f\n", x)
+fmt.Print(str)  //Sprintf = 123456.79
+
+The DEFAULT format for %v is:
+
+bool:                    %t   //the word true or false
+int, int8 etc.:          %d   //base 10
+uint, uint8 etc.:        %d   //base 10   (%#x if printed with %#v)
+float32, complex64, etc: %g   //float with decimal point (with exponent for large values)
+string:                  %s   //the uninterpreted bytes of the string or slice
+chan:                    %p   //pointer - base 16 notation, with leading 0x 
+pointer:                 %p   //base 16 notation, with leading 0x
+
+================
+fmt Format verbs   https://golang.org/pkg/fmt/
+================
+%v  any value in a natural format
+%+v for structs, the plus flag (%+v) adds field names
+%#v a Go-syntax representation of the value
+%p  pointers - address of 0th element in base 16 notation, with leading 0x
+%d  decimal integer
+%f, %g, %e float, double or exponential notation: 3.141593 3.141592653589793 3.141593e+00
+%t  boolean: true or false
+%c  character - a rune (Unicode code point)
+%s  string (string and slice of bytes)
+%q  quoted string "abc" or rune 'c'
+%T  type of any value
+%x  hexadecimal 
+%o  octal 
+%b  binary 
+%%  literal percent sign (no operand)
+
+=======================================
+
+Golang Compile and Install instructions:  https://golang.org/doc/tutorial/compile-install
+
+go build - compiles the packages, along with their dependencies, but it doesn't install the results.
+
+go install - compiles and installs the packages
+  go install github.com/rakyll/hey@latest   //get source code, compile it, and put the result in the bin directory
+
+Bodner, Jon (2106-02-06T22:28:15). Learning Go (Kindle Location 288). O'Reilly Media. Kindle Edition. 
+go list -f '{{.Target}}'  - returns the Go install path (where go will install the current package)
+
+export PATH=$PATH:/path/to/your/install/directory - Adds the Go install directory to your system's shell path
+
+-----------------------------
+Tools
+=====
+go fmt
+golangci-lint run <file>  //alias "lint" -- combines "go vet" and several linters to check for bugs and idomatic code
+golint <file.go>  //checks for idiomatic code in the file
+golint ./...    //checks for idiomatic code over your entire project
+go vet <file.go>  //checks for bugs/errors in the file
+go vet ./...    //checks for bugs/errors over your entire project
+
+-----------------------------
+make files
+==========
+
+.DEFAULT_GOAL := build
+
+fmt:
+  go fmt ./...
+.PHONY:fmt
+
+lint: fmt
+  golint ./...
+.PHONY:lint
+
+vet: fmt
+  go vet ./...
+.PHONY:vet
+
+build: vet
+  go build hello.go
+.PHONY:build
+
+-----------------------------
+Every type in Go is a value type. 
+It’s just that sometimes the value is a pointer: 
+  i.e., slices, maps, functions, channels and interfaces 
+
+Since variables are passed by value, you can be sure that 
+calling a function doesn’t modify the variable whose value 
+was passed in (unless the variable is a slices, maps, functions, channels or interfaces).
+
+-----------------------------
+
+Number literals 
+===============
+
+Literals are untyped because Go is a practical language. It makes
+sense to avoid forcing a type until the developer specifies one.
+
+  x := 1 + 2.0  //fails. mismatched types int and float64.
+
+Numbers are normally base 10. 
+  - Integer and floating point examples: 0, 2, 3.1415, 6.03e23, 10_521_107.3
+  - Practically speaking, use base ten to represent your number literals, 
+  unless the context makes your code clearer. 
+
+A prefix is used to indicate other bases:
+  0b for binary (base two)
+  0o for octal (base eight)
+  0x for hexadecimal (base sixteen)
+
+To make it easier to read longer integer literals, Go allows you to put
+underscores in the middle of your literal. 
+This allows you to, for example, group by thousands in base ten (1_234). 
+These underscores have no effect on the value of the number.
+Use them to improve readability by breaking up base ten numbers 
+at the thousands place or to break up binary, octal, or hexadecimal 
+numbers at one-, two-, or four-byte boundaries.
+
+-----------------------------
+
+Rune literals
+=============
+Rune literals represent characters and are surrounded by single quotes.
+
+Rune literals can be written as single Unicode characters ('a'), 
+  8-bit octal numbers ('\141'), 
+  8-bit hexadecimal numbers ('\x61'), 
+  16-bit hexadecimal numbers ('\u0061'), (AVOID USING THESE)
+  32-bit Unicode numbers ('\U00000061'). 
+
+There are also several useful backslash escaped rune literals: 
+  newline ('\n')
+  tab ('\t')
+  single quote ('\'')
+  double quote ('\"') and 
+  backslash ('\\')
+
+-----------------------------
+
+String literals
+===============
+String literals can be placed between double quotes ("hello world") or backquotes (`hello world`)
+
+"Greetings and\n\"Salutations\""
+
+If you need to include double quotes and/or linebreaks, you can use backquotes. 
+However, fmt formatting might mess up the spacing. 
+`Greetings and
+"Salutations"`
+
+-----------------------------
+Reference Types:
+  maps
+  slices
+  channels
+  functions
+  methods
+  interfaces
+
+Value Types:
+  structs
+  bool
+  string
+  int  int8  int16  int32  uint64       //the size of int depends on the CPU (32 bit or 64 bit)
+  uint uint8 uint16 uint32 uint64 uintptr   //the size of uint depends on the CPU. Also, don't use uint8. use byte instead. 
+  byte  // alias for uint8
+  rune  // alias for int32 (represents a Unicode code point). If you are referring to a character, use the rune type. 
+  float32 float64
+  complex64 complex128
+
+fmt.Println(reflect.ValueOf(x).Kind())    //output: "ptr" or some value type
+
+-----------------------------
+Visibility of variables, structs, fields, etc
+
+  Capitalized names are exported (visible from any package, public)
+  Lower case names are not exported (only visible within its own package)
+
+-----------------------------
+Concurrency tips (https://www.youtube.com/watch?v=DqHb5KBe7qI)
+
+- Release locks and semiphores in the reverse order you acquired them.
+- Channels aren't resources like files or sockets. You don't need to close them to free them.
+- Acquire semiphores right before you are ready to use themz   .  
+- Don't mix goroutines and anonymous functions. 
+- Before you start a goroutine, know how, when it will stop.  
+
+-----------------------------
+
+Sockets in golang explained (https://gabbi.fish/posts/go-sockets-gophercon/) 
+- TCP stream sockets (connection between client and server)
+- UDP datagram sockets (connectionless)
+
+-----------------------------
+
+package design and construction tips:
+  Run lint on your code to check for issues (golangci-lint)
+  Use test driven design (TDD). Include tests. 
+  Put your _test.go files in a different package - to get an end user perspective on usage. 
+  Use godoc early: godoc -http=:8080 (produces documentation. gives user perspective, again)
+  Keep the go file small. 
+  Keep the API small - one method/function is ideal.
+  Leave concurrency to the user. The user may or may not want a blocking api.
+  See things from the user perspective.   
+  Follow conventions. Don't surprise. Be obvious not clever.
+  Don't send log output directly. Or make it a dependency or let users control it.
+  Make zero values useful. 
+  Avoid constructors, if possible (to keep things simple, reduce mystery, reduce api size.)
+  Don't automatically add interfaces. 
+  A project with a logo gets 85% more usage/adoption
+
+  Use subfolders with standard names:
+    pkg - for package code
+    cmd - for commands
+    testfiles - for test data
+    internal - for internal stuff that only your code will import
+    docs - additional documentation
+
+-----------------------------
+Arrays in Go are VALUES. This has a couple of important implications: 
+  var names [4]string         //declare a string array of size 4
+  names[0] = "Jimmy"          //assign a value to the first element in the array
+  grades := [4]int{93, 75, 86, 91}  //declare and initialize an integer array of size 4
+  ages   := [...]int{16, 17, 15, 16}  //declare and initialize an integer array of size 4
+  ages2  := ages            //creates a new array and COPIES all the values from ages into ages2
+  length := len(names)        //returns the length of the array (i.e, 4)
+
+  //declare and initialize a 2-dimentional array (3x3)
+  var identityMatrix := [3][3]int{ [3]int{1, 0, 0}, [3]int{0, 1, 0}, [3]int{0, 0, 1} }
+
+(0) arrays have a fixed size
+(1) assigning one array to another COPIES all of the elements, and
+(2) if you pass an array to a function, it will receive a COPY of the array (not a pointer or reference to it).
+This can be very expensive -- especially if you are working with arrays that have a large number of elements.
+
+-----------------------------
+
+==============
+Slice / Slices - A slice is not an array. A slice describes a piece of an array.
+==============
+  - slices are REFERENCE types. 
+  - Passing a slice to a function does NOT copy the underlying data. 
+  - internally, a slice is represented as a "slice header": 
+    type sliceHeader struct {
+        Length        int
+        Capacity      int
+        ZerothElement *byte   //a pointer to the starting byte within the backing array 
+    }
+  - unlike arrays, slice can grow in length
+  - if the slice length grows beyond the length of the backing array, a new array 
+
+  var s []int             //declare a slice that might remain nil
+  var s = []int{}           //create an empty slice literal (zero length)
+  s := []int{1, 2, 3}         //declare and initialize a slice literal with given values
+  s = append(a, 4, 5, 6)        //appends any number of individual values to a
+  a := make([]int, 0, 100)      //create a new slice of ints with length 0 and capacity 100
+
+  //append ALWAYS increases the length of a slice! It always adds values to the END of the current length. 
+  a = append(a, s)          //FAILS (the slice s must be expanded into individual values)
+  a = append(a, s...)         //SUCCEEDS the ... notation expands slice (s) into its individual values
+  length := len(s)          //returns the length of the slice (3)
+  capacity := cap(s)          //returns the capacity of the underlying array (100)
+
+0) Slices are backed by arrays
+1) They are cheap to assign and can be passed to other functions without having to create a new copy of its underlying array. 
+2) Slices are much more flexible, powerful, and convenient than arrays. 
+3) Unlike arrays, slices can be resized using the built-in append() function. 
+All the functions in Go’s standard library use slices rather than arrays in their public APIs.
+
+  a := [4]int{10,11,12,13}    //create a new array of int of size 4
+  var b []int           //declare a new empty slice of int
+  b = a[:]            //create a slice that points to a (the backing array)
+  fmt.Printf("a: %v, len: %v, cap: %v, type: %T\n", a, len(a), cap(a), a)   //a: [10 11 12 13], len: 4, cap: 4, type: [4]int
+  fmt.Printf("b: %v, len: %v, cap: %v, type: %T\n", b, len(b), cap(b), b)   //[10 11 12 13], len: 4, cap: 4, type: []int
+
+-----------------------------
+
+Maps - maps are reference values. They are passed by reference with side effects.
+
+  p := map[string]int{}       //delare an empty map of strings to ints
+  q := make(map[string]int)     //delare an empty map of strings to ints
+  r := q                //r points to the same map as q 
+
+  statePopulations := map[string]int{ //delare and initialize a map of strings to ints
+    "California": 39250017,
+    "Texas":    27862596,
+    "Florida":    20612439,
+  }
+
+  statePopulations["Georgia"] = 1031037   //adds Georgia to the map
+  pop, ok := statePopulations["Ohio"]     //check if a key exists in the map (pop = 0 !!!, ok = false)
+  delete(statePopulations, "Texas")     //deletes Texes from the map  
+  texasPop := statePopulations["Texas"]     //gets the population of Texas
+  length := len(statePopulations)       //returns the number of elements in the map
+
+  //if statement example that checks if key is found
+  if pop, ok := statePopulations["Texas"]; ok {
+    fmt.Println(pop)
+  } else {
+    fmt.Println("Key not found in map")
+  }
+
+-----------------------------
+
+Structs - structs are VALUE types. they are passed by COPY. 
+
+  //"Mother" is upper case (visible everywhere). ssn is lower case (visible only within the package)
+
+  type Mother struct {    //declare a struct with a mix of data types (no commas in declaration)
+    ssn int         //lower case fields are only visible within the package
+    Name string       //upper case fields are visible everywhere
+    Children []string
+  }
+
+  m := Mother{        //initialize a struct with values (commas req'd after EVERY field)
+    ssn: 111223333,     //ALWAYS use field names when assigning value
+    Name: "Mary",
+    Children: []string{
+      "Bobby",
+      "Billy",
+    },
+  }
+
+  n := m            //n holds a full copy of m's data and exists independently
+  n.name = "Joe"        //does NOT change m
+
+  fmt.Println(m.Name)     //use dot notation to access the fields of the struct
+  fmt.Println(m.Children[0])  //prints out "Bobby"
+  m.children[0] = "Tommy"   //assign or change the value of a field using dot notation
+
+  Anonymous struct -- There is no type declaration. This is rarely used. Typically short-lived. 
+    person := struct{
+      name string
+      age int
+    }{name: "Bobby", age: 21}
+
+  ===========
+  struct tags -- tags are used to write custom code to validates field values, etc. 
+  ===========
+
+  type Mother struct {
+    Ssn      int      `json:"required maxSsn=9"`  //tag
+    Name     string   `json:"required maxName=100"`
+    Children []string `json:"optional"`
+  }
+
+  t := reflect.TypeOf(Mother{})
+  field, _ := t.FieldByName("Name")
+  fmt.Println(field.Tag)        // json:"required maxLength=100"
+
+  use the following command to check the syntax of the tags
+    go vet <myGoCode.go>
+
+  ============================
+  STRUCT COMPOSITION/EMBEDDING (embed structs within structs)
+    - Used to compose structs with multiple characteristics (e.g., both a book and an article can contain text.)
+    - Represents a "has-a" relationship (via composition)
+    - It is NOT used to model behavior 
+    - It is NOT a form of inheritance. Go does NOT support inheritance. 
+    - Go prefers composition over inheritance. 
+  ============================
+
+import (
+  "fmt"
+  "github.com/kr/pretty"
+)
+
+  func main() {
+
+    type Animal struct {
+      Name string
+      Origin string
+    }
+
+    type Bird struct {
+      Animal        //embedded fields are NOT given a name (A bird has animal characteristics)
+      Speed int
+      CanFly  bool
+    }
+
+    //literal declaration to assign values
+    b := Bird{
+      Animal:   Animal{Name: "emu", Origin: "Australia"}, //note how the embedded struct is exposed
+      Speed:    48,
+      CanFly:   false,
+    }
+    
+    fmt.Printf("%# v", pretty.Formatter(b)) 
+  }
+  --OUTPUT-- (note how a Bird has Animal characteristics)
+  main.Bird{
+      Animal: main.Animal{Name:"emu", Origin:"Australia"},
+      Speed:  48,
+      CanFly: false,
+  }
+
+  //or use dot notation to directly assign values to the individual field names
+  b := Bird{}
+  b.Name = "Emu"
+  b.Origin = "Australia"
+  b.Speed = 48
+  b.CanFly = 
+
+
+  fmt.Println(b)      //  {{Emu Australia} 48 false}
+
+
+--------------------------------
+
+Conditional Tests (if & switch statements)
+
+  //if statement example that checks if key is found in a map
+  if pop, ok := statePopulations["Texas"]; ok {
+    fmt.Println(pop)
+  } else {
+    fmt.Println("Texas not found")
+  }
+
+  a := 10
+  if a < 10 {
+    fmt.Println("a is less than 10")
+  } else if a > 10 {
+    fmt.Println("a is larger than 10")
+  } else {
+    fmt.Println("a is 10!")
+  }
+
+  //switch on a tag (e.g., a)
+  a := 2
+  switch a {
+  case 1, 5, 10:
+    fmt.Println("one, five, or ten")
+  case 2, 4, 6:
+    fmt.Println("two, four or six")
+  default:
+    fmt.Println("another number")
+  }
+
+  //tagless switch statement
+  a := 2
+  switch {            //notice no variable name is given
+  case a < 10:
+    fmt.Println("less than ten")
+  case a > 10:
+    fmt.Println("more than ten")
+  default:
+    fmt.Println("it's ten")
+  }
+
+  //switch on a variable's type
+  var a interface{} = 1.1
+  switch a.(type) {
+  case int:
+    fmt.Println("it's an int")
+  case string:
+    fmt.Println("it's a string")
+  case rune:
+    fmt.Println("it's a rune")
+  default:
+    fmt.Printf("its type is %T", a)
+  }
+
+  //also, the switch tag can be initialized inline
+  switch i := 2 + 3; i {
+  case 1, 5, 10:
+    fmt.Println("one, five, or ten")
+  case 2, 4, 6:
+    fmt.Println("two, four or six")
+  default:
+    fmt.Println("another number")
+  }
+
+  ---------------------
+
+  Looping
+
+  for <optional initializer>; <comparison boolean test>; <optional incrementer> {
+    //some logic
+  }
+
+  for i := 0; i < 5; i++ {
+    fmt.Println(i)
+  }
+
+  for {         //while loop syntax 
+    // do loop tasks
+
+    if !CONDITION {
+      break
+    }
+  }
+
+  i := 0
+  for i < 5 {       //while loop syntax 
+    fmt.Println(i)
+    i++
+  }
+
+  i := 0
+  for { //for loop with break statement logic
+    if i > 4 {
+      break
+    } else {
+      fmt.Println(i)
+      i++
+      continue
+    }
+  }
+
+  //for loop with multiple variables
+  for i, j := 0, 2; i < 5; i, j = i+1, j+2 {
+    fmt.Println(i, j)
+  }
+
+  for i, j := 0, 2; i < 5; i, j = i++, j++ {  //this fails, since i++ is a statement
+    fmt.Println(i, j)
+  }
+
+  //looping over collections (arrays, slices, maps, strings, and channels)
+  //range keyword 
+  s := []string{"a", "b", "c"}
+  for k, v := range s {
+    fmt.Println(k, v)   //prints out the index and the value of each element
+  }
+
+  //break out of nested loops using a label
+  MyLoop:
+    for i := 1; i < 4; i++ {
+      for j := 1; j < 4; j++ {
+        if i*j < 7 {
+          fmt.Println(i * j)
+        } else {
+          break MyLoop
+        }
+      }
+    }
+
+---------------------
+
+=====
+defer 
+  - defers the execution of function calls (Last in First Out - LIFO) 
+  - it is useful for closing resources right after opening them (to not forget)
+=====
+
+  func main() {       //prints out "4321"
+    defer fmt.Print("1")
+    defer fmt.Print("2")
+    defer fmt.Print("3")
+    defer fmt.Print("4")
+  }
+
+  //typical defer useage pattern
+  func SomeFunction() {
+    res, err := http.Get("http://www.google.com/robots.txt") //open a resource
+    if err != nil {       //check for errors
+      log.Fatal(err)
+    }
+    defer res.Body.Close()    //close the resource with defer
+    //Continue using the resource. It will be closed when SomeFunction() ends.
+  }
+
+=====
+panic 
+  - used when the application cannot continue to function
+  - panic happens AFTER defer statements are excecuted
+=====
+
+  //example showing use of panic to halt an application that cannot continue
+  err := http.ListenAndServe(":8080", nil)  //error id port is blocked
+  if err != nil {
+    panic(err.Error())  //panic: listen tcp :8080 bind: address already in use
+  }
+
+==================
+Pointers vs Values 
+==================
+
+Which one to use is a question of shared access (not usually a performance question)
+  - if you WANT to share the value with a function/method 
+  - if you DO NOT want to share, use a value (copy)
+  - with very large datasets, using a pointer may be faster
+
+
+====================
+Functions vs Methods
+====================
+
+Functions do NOT depend on state in any way.
+  - Functions are operations performed on N1 inputs that produce N2 outputs.
+  - Provided some input parameters, the returned output values will always be the same.
+  - Functions do NOT depend on the state.
+  - Functions can accept interfaces as input.
+
+Methods on the other way are tightly linked to the type on which they are attached.
+  - Methods define the BEHAVIOR of its type. 
+  - If they have POINTER receivers, they SHOULD manipulate/manage its state.
+    - otherwise, they should use VALUE receivers (safe for concurrent access)
+    - pointer receivers are NOT safe for concurrent access (obviously)
+  - Methods are BOUND to a specific type.
+  - Methods SHOULD use state to determine the behavior (it's logically connected to the state)
+  - if operating on an EMPTY struct, use VALUE receivers (i.e., for behavior only -- no state manipulation.)
+
+
+If your methods do NOT depend on the state, they should probably be defined as functions.
+
+
+=========
+Functions
+=========
+
+Anonymous functions
+
+  func main() {
+    func(name string) {       //anonymous function
+      fmt.Println("Hello", name)  //prints "Hello John"
+    }("John")           //immediately calls the function
+  }
+
+Returning a function from a function
+
+  func GetGreetingFunc() func(name string)string {
+    return func(name string) string {
+      return "Hello " + name
+    }
+  }
+
+  func main() {
+    f := GetGreetingFunc()
+    s := f("Janet") 
+    fmt.Println("main:", s)     //main: Hello Janet
+  }
+
+-------------
+
+A function can return multiple values
+
+  func divide(num, denom float64) (float64, error) { //a function that returns multiple values
+    if denom == 0.0 {
+      return 0.0, fmt.Errorf("Cannot divide by zero.")
+    }
+    return num / denom, nil
+  }
+
+  func main() {
+    r, err := divide(1.0, 5.0)  //get both return values
+    if err != nil {             //immediately check for errors
+      fmt.Println(err)    //process the error
+      return
+    } //No "else" block! 
+      //Instead, the main thread of execution remains left-justified
+    
+    fmt.Println("result=", r)   //result= 0.2
+  }
+
+==================
+Variadic Functions - a function that can take any number of values for a parameter
+  - You can mix the non-variadic input params with a variadic param by putting the variadic param LAST.
+  - However, you can’t declare more params after a variadic param.
+==================
+
+  func sum(values ...int) int {   //... means any number of values can be passed to the function (values becomes a slice inside the function)
+    result := 0
+    for _, v := range values {  //the _ (underscore) means we're not interested in the index of each value in the slice
+      result += v
+    }
+    return result
+  }
+
+  //now call the variadic function above
+  func main() {
+    r := sum(1,2,3,4)
+    fmt.Println("result=", r) //result= 10
+  }
+
+  ------------ same logic below but this time the sum() function returns a pointer (*int)
+
+  func sum(values ...int) *int { //the ... notation means any number of values can be passed to the function
+    result := 0
+    for i, v := range values { //the _ means we're not interested in the index of each value
+      fmt.Println(i, v)
+      result += v
+    }
+    return &result
+  }
+
+  func main() {
+    r := sum(1,2,3,4)     //r is type *int
+    fmt.Println("result=", *r)  //result= 10  //need to dereference the pointer to get the value (10)
+  }
+
+============
+Methods
+============
+
+  1) Methods with value type receivers (no side effects)
+
+  type greeter struct {
+    greeting string
+    name     string
+  }
+
+  //the greet() method executes within the context of greeter objects
+  func (g greeter) greet() {     ("g greeter" is "the receiver" of this method -- a value object with NO side effects)
+    fmt.Println(g.greeting, g.name)
+  }
+
+  func main() {
+    g := greeter{
+      greeting: "Bonjour", 
+      name: "Marie",
+    }
+    g.greet()
+  }
+
+---------------
+
+  1) Methods with pointer type receivers (has side effects)
+
+  type person struct {
+    firstName string
+    lastName  string
+  }
+
+  //the changeFirstName() method executes within the context of greeter objects
+  func (p *person) changeFirstName(name string) {   //"p *person" is "a pointer receiver" of this method -- WITH side effects)
+    p.firstName = name
+  }
+
+  func main() {
+    p := person{
+      firstName: "Marie",
+      lastName:  "Simpson",
+    }
+    fmt.Println(p)
+    p.changeFirstName("Suzie")
+    fmt.Println(p)
+  }
+
+---------------
+
+======
+ERRORS - it's an interface with one behavior/method -- Error() string
+======
+
+//definition: an error is defined as an interface
+  type error interface {
+    Error() string
+  }
+
+There are 2 ways to create a new error:
+  var err error = errors.New("This is my error message.")
+  error := fmt.Errorf("My error message: %w", err)
+  fmt.Println(err)    //This is my error message. The Erro() method is called automatically. 
+
+Do NOT compare error message strings.
+Instead, export specifically named errors so they can be compared by value. 
+
+  //exported errors (these are from the go std library)
+  ErrInvalid := errors.New("invalid argument.")
+  ErrPermission := errors.New("permission denied.")
+
+  //somewhere else in the codebase
+  if err == ErrInvalid {
+    //handle ErrOne
+  } else if err == ErrPermission {
+    //handle ErrTwo
+  } //...
+
+  //or define and export a custom error type that provides more useful behaviors
+  type PathError struct {
+    Op string
+    Path string
+    Err error
+  }
+  //custom method that provides a useful and complete error message string
+  func (e *PathError) Error() string {
+    return e.Op + "" + e.Path + " " + e.Err.Error()
+  }
+
+
