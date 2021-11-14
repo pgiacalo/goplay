@@ -86,26 +86,25 @@ func (r *Receiver) Read() interface{} {
 	return v
 }
 
-
 //--------- test code ----------
 
 //a message struct that will be published
 type messageA struct {
-	id int
+	id   int
 	name string
 }
 
 //a message struct that will be published
 type messageB struct {
-	id int
+	id   int
 	name string
-	msg messageA
+	msg  messageA
 }
 
 //implementation of the listener that waits for messages to arrive via the given receiver (the id is just for debugging)
 func listen(id int, r Receiver) {
 	for v := r.Read(); v != nil; v = r.Read() {
-		fmt.Printf("listener id:%v, received message:%v\n", id, v);
+		fmt.Printf("listener id:%v, received message:%v\n", id, v)
 		//collect all the messages in one array -- just to double check what is being received
 		msgCollection[msgCounter] = v
 		msgCounter++
@@ -131,12 +130,12 @@ var receiverB2 = b.Listen()
 func main() {
 
 	//start two listeners -- to listen for broadcasts from broadcaster a
-	go listen(1, receiverA1);
-	go listen(2, receiverA2);
+	go listen(1, receiverA1)
+	go listen(2, receiverA2)
 
 	//start two listeners -- to listen for broadcasts from broadcaster b
-	go listen(3, receiverB1);
-	go listen(4, receiverB2);
+	go listen(3, receiverB1)
+	go listen(4, receiverB2)
 
 	//publish some messages via publisher a
 	go sendA(msgsToSend)
@@ -144,31 +143,31 @@ func main() {
 	go sendB(msgsToSend)
 
 	//keep main alive so the work can get done
-	time.Sleep(3 * 1e9);
+	time.Sleep(3 * 1e9)
 
 	//Finally, print out all of the messages received so we can see exactly what was received.
 	//Note that each message has its own address, indicating that the messages are copies of the original.
-	for i:=0; i<len(msgCollection); i++{
+	for i := 0; i < len(msgCollection); i++ {
 		fmt.Printf("msgCollection[%v]: %v, addr: %v\n", i, msgCollection[i], &msgCollection[i])
 	}
 }
 
-func sendA(qty int){
-	for i := 0; i  < qty; i++ {
+func sendA(qty int) {
+	for i := 0; i < qty; i++ {
 		msgA := messageA{i, "Msg A"}
-		a.Write(msgA);
+		a.Write(msgA)
 		time.Sleep(250 * time.Millisecond)
 	}
 	//writing nil closes the
-	a.Write(nil);
+	a.Write(nil)
 }
 
-func sendB(qty int){
-	for i := 0; i  < qty; i++ {
+func sendB(qty int) {
+	for i := 0; i < qty; i++ {
 		msgA := messageA{i, "Embedded msg A"}
 		msgB := messageB{i, "Msg B", msgA}
-		b.Write(msgB);
+		b.Write(msgB)
 		time.Sleep(250 * time.Millisecond)
 	}
-	b.Write(nil);
+	b.Write(nil)
 }

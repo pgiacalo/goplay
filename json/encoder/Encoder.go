@@ -31,7 +31,7 @@ func main() {
 
 	post := Post{Id: 1, Content: "Hello World!"}
 	post.Author = Author{Id: 2, Name: "Sau Sheong"}
-	post.Comments = make([]Comment, 2)	//make an array of Comment structs of length 2
+	post.Comments = make([]Comment, 2) //make an array of Comment structs of length 2
 	post.Comments[0] = Comment{Id: 1, Content: "Have a great day!", Author: "Adam"}
 	post.Comments[1] = Comment{Id: 2, Content: "How are you today?", Author: "Betty"}
 

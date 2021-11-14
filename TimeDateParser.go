@@ -47,4 +47,3 @@ func ConvertToUTC(timestamp time.Time) (time.Time, error) {
 	utcTimestamp := timestamp.In(utc)
 	return utcTimestamp, err
 }
-

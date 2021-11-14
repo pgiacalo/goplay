@@ -6,16 +6,6 @@ import (
 	"strings"
 )
 
-func main1() {
-	var s, sep string
-	//skip the first Arg since it is the name of the function (i.e., main)
-	for i := 0; i < len(os.Args); i++ {
-		s += sep + os.Args[i]
-		sep = " "
-	}
-	fmt.Println(s)
-}
-
 func main() {
 	fmt.Println(strings.Join(os.Args[1:], " "))
 

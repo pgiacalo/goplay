@@ -9,7 +9,7 @@ func main() {
 
 	start := time.Now()
 	//Get the abbreviated name of the time zone (such as "CET") and its offset in seconds east of UTC.
-	fmt.Println(start.Zone())	//returns PST -28800
+	fmt.Println(start.Zone()) //returns PST -28800
 
 	const longForm = "Jan 2, 2006 at 3:04pm (MST)"
 	t, _ := time.Parse(longForm, "Feb 3, 2013 at 7:54pm (PST)")
@@ -19,7 +19,7 @@ func main() {
 	t, _ = time.Parse(shortForm, "2013-Feb-03")
 	fmt.Println(t)
 
- 	//loc, _ := time.LoadLocation("Europe/Berlin") 		//e.g., "America/New_York"
+	//loc, _ := time.LoadLocation("Europe/Berlin") 		//e.g., "America/New_York"
 	loc, _ := time.LoadLocation(time.Now().Location().String())
 
 	t, _ = time.ParseInLocation(longForm, "Jul 9, 2012 at 5:02am (CEST)", loc)
@@ -42,6 +42,3 @@ func main() {
 	fmt.Printf("Runtime=%v\n", diff.String())
 
 } //end main()
-
-
-
