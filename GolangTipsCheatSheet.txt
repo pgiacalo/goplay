@@ -527,8 +527,8 @@ pointer:                 %p   //base 16 notation, with leading 0x
 fmt Format verbs   https://golang.org/pkg/fmt/
 ================
 %v  any value in a natural format
-%+v for structs, the plus flag (%+v) adds field names
 %#v a Go-syntax representation of the value
+%+v for structs, the plus flag (%+v) adds field names
 %p  pointers - address of 0th element in base 16 notation, with leading 0x
 %d  decimal integer
 %f, %g, %e float, double or exponential notation: 3.141593 3.141592653589793 3.141593e+00
@@ -659,9 +659,10 @@ However, fmt formatting might mess up the spacing.
 
 -----------------------------
 Reference Types:
-  maps
   slices
+  maps
   channels
+  pointers
   functions
   methods
   interfaces
@@ -913,6 +914,29 @@ import (
 
   fmt.Println(b)      //  {{Emu Australia} 48 false}
 
+
+--------------------------------
+Generics (example)
+//https://levelup.gitconnected.com/generics-in-go-viva-la-revolution-e27898bf5495
+
+//replace the 3 functions below with the following function
+//The parameter T stands for any type that fulfills the Ordered constraint
+func Max[T constraints.Ordered](a, b T) T {
+  // some code
+}
+
+//old way (without generics)
+func MaxInt(a, b int) int {
+  // some code
+}
+
+func MaxFloat64(a, b float64) float64 {
+  // some code
+}
+
+func MaxByte(a, b byte) byte {
+  // some code
+}
 
 --------------------------------
 
