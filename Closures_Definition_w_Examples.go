@@ -1,5 +1,14 @@
-//DEFINITION: A closure is an anonymous function that remembers the variable(s) from the environment in which it was CREATED.
+/*
+Closures
+Functions declared inside of functions are special; they are closures.
+This is a computer science word that means that functions declared
+inside of functions are able to access and modify variables declared
+in the outer function.
+*/
+
+//DEFINITION: A closure is an anonymous function that has access to the variable(s) from the environment in which it was CREATED.
 //Function literals and closures. Function literals are closures: they inherit the scope of the function in which they are declared.
+
 package main
 
 import (
